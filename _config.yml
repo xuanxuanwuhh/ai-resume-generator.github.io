@@ -1,0 +1,21 @@
+title: 简历生成与优化工作台
+description: 基于 Jekyll 的静态网站版简历生成器，支持入口选择、主题切换、语言切换、9 个模板、本地规则评分和目标匹配。
+lang: zh-CN
+baseurl: ""
+url: ""
+markdown: kramdown
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - TEAM_WORK_PLAN.md
+  - Dockerfile
+  - docker-compose.yml
+  - build_exp5_report.py
+  - start-jekyll.ps1
+  - check-jekyll.ps1
+  - api
+  - .jekyll-cache
+  - report-assets
+  - 复现命令.txt
+  - 创新实验-实验五-期末大作业-Jekyll静态网站版-完成版.docx

@@ -1,0 +1,27 @@
+# 实验五 Jekyll 静态网站版简历生成器复现命令
+
+Set-Location -LiteralPath "D:\BiographicalNotes-Jekyll-Final"
+
+# 推荐：一键启动并等待站点就绪
+.\start-jekyll.ps1
+
+# 检查 Docker、容器状态和示例页面
+.\check-jekyll.ps1
+
+# 手动启动 / 查看日志 / 停止
+docker compose up -d
+docker compose logs -f jekyll
+docker compose down
+
+# 打开截图页面
+Start-Process "http://127.0.0.1:4000/"
+Start-Process "http://127.0.0.1:4000/?case=recommendation&template=blue&theme=ember"
+Start-Process "http://127.0.0.1:4000/?case=admission&template=sidebar&theme=violet&lang=en"
+Start-Process "http://127.0.0.1:4000/?case=postgraduate&template=timeline&theme=forest"
+
+# 查看项目目录
+tree D:\BiographicalNotes-Jekyll-Final /F
+
+# 重新生成 Word 报告
+Set-Location -LiteralPath "D:\BiographicalNotes-Jekyll-Final"
+python .\build_exp5_report.py
