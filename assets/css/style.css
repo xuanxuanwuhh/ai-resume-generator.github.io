@@ -15,6 +15,12 @@
   --amber: #b7791f;
   --rose: #be123c;
   --shadow: rgba(16, 24, 40, 0.10);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
 }
 
 * {
@@ -73,75 +79,94 @@ button {
   display: none !important;
 }
 
+/* ========================================
+   入口首页样式优化
+   ======================================== */
+
 .entry-screen {
   min-height: 100vh;
-  padding: 42px;
+  padding: 48px 42px;
   color: #eef2f7;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(15, 118, 110, 0.06) 50%, rgba(183, 121, 31, 0.04) 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     #111827;
-  background-size: 48px 48px;
+  background-size: 100% 100%, 48px 48px, 48px 48px;
 }
 
 .entry-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 430px;
-  gap: 34px;
-  width: min(1180px, 100%);
+  grid-template-columns: minmax(0, 1fr) 440px;
+  gap: 48px;
+  width: min(1200px, 100%);
   margin: 0 auto;
-  min-height: calc(100vh - 84px);
+  min-height: calc(100vh - 96px);
   align-items: center;
 }
 
 .entry-copy {
-  max-width: 680px;
+  max-width: 700px;
 }
 
 .entry-kicker {
   display: inline-flex;
-  min-height: 30px;
+  min-height: 32px;
   align-items: center;
-  padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #c7d2fe;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
+  color: #a5b4fc;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .entry-copy h1 {
-  margin: 20px 0 14px;
-  font-size: 54px;
-  line-height: 1.05;
-  letter-spacing: 0;
+  margin: 24px 0 16px;
+  font-size: 56px;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .entry-copy p {
   margin: 0;
-  max-width: 620px;
-  color: #cbd5e1;
-  font-size: 18px;
-  line-height: 1.75;
+  max-width: 640px;
+  color: #94a3b8;
+  font-size: 17px;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
 }
 
 .entry-panel {
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  background: rgba(17, 24, 39, 0.86);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(17, 24, 39, 0.98) 100%);
+  box-shadow: 
+    0 24px 64px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 .entry-section {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
+}
+
+.entry-section:last-of-type {
+  margin-bottom: 0;
 }
 
 .entry-section h2 {
-  margin: 0 0 10px;
-  color: #ffffff;
-  font-size: 16px;
+  margin: 0 0 12px;
+  color: #f1f5f9;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .entry-panel label {
@@ -151,7 +176,7 @@ button {
 .entry-options {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .entry-options.two {
@@ -161,70 +186,102 @@ button {
 .entry-choice,
 .lang-choice,
 .theme-dot {
-  min-height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #e5e7eb;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
+  transition: all var(--transition-fast);
 }
 
 .entry-choice:hover,
-.entry-choice.active,
-.lang-choice:hover,
-.lang-choice.active {
-  border-color: #93c5fd;
-  background: #2563eb;
+.lang-choice:hover {
+  border-color: rgba(147, 197, 253, 0.5);
+  background: rgba(37, 99, 235, 0.15);
   color: #ffffff;
+}
+
+.entry-choice.active,
+.lang-choice.active {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
 .theme-options {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.theme-dot {
+  position: relative;
+  transition: all var(--transition-fast);
 }
 
 .theme-dot[data-theme-choice="aurora"] {
-  background: #2563eb;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 .theme-dot[data-theme-choice="forest"] {
-  background: #0f766e;
+  background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
 }
 
 .theme-dot[data-theme-choice="ember"] {
-  background: #b7791f;
+  background: linear-gradient(135deg, #f59e0b 0%, #b7791f 100%);
 }
 
 .theme-dot[data-theme-choice="violet"] {
-  background: #66509a;
+  background: linear-gradient(135deg, #8b5cf6 0%, #66509a 100%);
+}
+
+.theme-dot:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .theme-dot.active {
-  outline: 3px solid rgba(255, 255, 255, 0.70);
-  outline-offset: 1px;
+  outline: 3px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 2px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .start-btn {
   width: 100%;
-  min-height: 48px;
+  min-height: 52px;
+  margin-top: 24px;
   border: 0;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #111827;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  color: #1e293b;
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .start-btn:hover {
-  background: #dbeafe;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
 }
+
+.start-btn:active {
+  transform: translateY(0);
+}
+
+/* ========================================
+   工作台样式优化
+   ======================================== */
 
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(340px, 420px) minmax(560px, 1fr) minmax(310px, 360px);
+  grid-template-columns: minmax(360px, 420px) minmax(560px, 1fr) minmax(320px, 380px);
   min-height: 100vh;
 }
 
@@ -236,154 +293,177 @@ button {
 }
 
 .control-pane {
-  padding: 18px;
-  background: var(--nav);
+  padding: 20px;
+  background: linear-gradient(180deg, var(--nav) 0%, var(--nav-soft) 100%);
   color: #eef2f7;
 }
 
 .assistant-pane {
-  padding: 18px;
+  padding: 20px;
   border-left: 1px solid var(--line);
-  background: #eef2f7;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  margin-bottom: 16px;
+  gap: 14px;
+  min-height: 62px;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 8px;
-  background: #ffffff;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
   color: var(--nav);
-  font-size: 17px;
-  font-weight: 900;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .brand h1 {
   margin: 0;
   font-size: 20px;
   line-height: 1.2;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
 }
 
 .brand p {
   margin: 4px 0 0;
-  color: #b8c3d3;
-  font-size: 13px;
+  color: #94a3b8;
+  font-size: 12px;
 }
 
 .privacy-note {
   display: grid;
-  gap: 4px;
-  margin-bottom: 16px;
-  padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 8px;
-  background: var(--nav-soft);
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--nav-soft) 0%, rgba(30, 41, 59, 0.8) 100%);
 }
 
 .privacy-note strong {
-  color: #ffffff;
+  color: #f1f5f9;
   font-size: 13px;
+  font-weight: 700;
 }
 
 .privacy-note span {
-  color: #c8d2df;
+  color: #94a3b8;
   font-size: 12px;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .panel {
-  margin-bottom: 14px;
-  padding: 15px;
+  margin-bottom: 16px;
+  padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--panel);
-  box-shadow: 0 10px 24px var(--shadow);
+  box-shadow: 0 8px 24px var(--shadow);
+  transition: box-shadow var(--transition-normal);
+}
+
+.panel:hover {
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
 }
 
 .control-pane .panel {
-  border-color: rgba(255, 255, 255, 0.10);
-  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
   color: var(--text);
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .panel.compact {
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 }
 
 .panel-title {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-bottom: 13px;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.control-pane .panel-title {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
 }
 
 .panel-title span {
   display: grid;
   place-items: center;
-  width: 30px;
+  width: 32px;
   height: 28px;
-  border-radius: 7px;
-  background: var(--primary-soft);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary-soft) 0%, var(--primary-soft) 100%);
   color: var(--primary);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .panel-title h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.2;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
+  font-weight: 700;
 }
 
 .case-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .case-btn {
-  min-height: 38px;
+  min-height: 42px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: #ffffff;
   color: var(--text);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  transition: all var(--transition-fast);
 }
 
-.case-btn:hover,
+.case-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
 .case-btn.active {
   border-color: var(--primary);
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
+  gap: 14px;
 }
 
 label {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   min-width: 0;
   color: var(--text);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 label.wide {
@@ -395,25 +475,32 @@ select,
 textarea {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: #ffffff;
   color: var(--text);
-  padding: 10px 11px;
+  padding: 11px 13px;
   outline: none;
   font-weight: 500;
+  transition: all var(--transition-fast);
 }
 
 textarea {
-  min-height: 88px;
+  min-height: 92px;
   resize: vertical;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  background: #fefeff;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
 }
 
 .preview-pane {
@@ -421,58 +508,72 @@ textarea:focus {
   flex-direction: column;
   min-width: 0;
   min-height: 100vh;
-  background: #e6ebf2;
+  background: linear-gradient(180deg, #e8ecf2 0%, #dde3eb 100%);
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  min-height: 72px;
-  padding: 12px 20px;
+  gap: 16px;
+  min-height: 76px;
+  padding: 14px 22px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .eyebrow {
   display: block;
   margin-bottom: 4px;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .topbar strong {
   font-size: 20px;
+  letter-spacing: -0.01em;
 }
 
 .toolbar {
   display: flex;
   align-items: end;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
 .toolbar label {
-  min-width: 132px;
+  min-width: 140px;
 }
 
 .toolbar button,
 .primary-action {
-  min-height: 38px;
+  min-height: 42px;
   border: 0;
-  border-radius: 8px;
-  background: var(--primary);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #ffffff;
-  padding: 0 14px;
+  padding: 0 18px;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 .toolbar button:hover,
 .primary-action:hover {
-  background: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+.toolbar button:active,
+.primary-action:active {
+  transform: translateY(0);
 }
 
 .primary-action {
@@ -480,111 +581,119 @@ textarea:focus {
 }
 
 .primary-action.secondary {
-  background: var(--teal);
+  background: linear-gradient(135deg, var(--teal) 0%, #0b5d56 100%);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
 }
 
 .primary-action.secondary:hover {
-  background: #0b5d56;
+  background: linear-gradient(135deg, #0b5d56 0%, #0a4d47 100%);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.3);
 }
 
 .paper-stage {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 30px;
+  padding: 32px;
 }
 
 .resume-paper {
   width: min(100%, 794px);
   min-height: 1123px;
   margin: 0 auto;
-  padding: 42px;
-  border: 1px solid #e5e7eb;
-  border-radius: 3px;
+  padding: 44px 48px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
   background: #ffffff;
   color: #1f2937;
-  box-shadow: 0 18px 46px rgba(16, 24, 40, 0.16);
+  box-shadow: 
+    0 20px 50px rgba(16, 24, 40, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
 }
 
 .resume-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  padding-bottom: 22px;
+  gap: 28px;
+  padding-bottom: 24px;
   border-bottom: 3px solid var(--primary);
 }
 
 .resume-head h2 {
   margin: 0;
-  font-size: 34px;
-  line-height: 1.12;
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
 .resume-head p {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   color: #475569;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .resume-head ul {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   padding: 0;
   list-style: none;
   color: #475569;
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.9;
   text-align: right;
 }
 
 .resume-paper section {
-  margin-top: 24px;
+  margin-top: 26px;
 }
 
 .resume-paper h3 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: var(--primary);
   font-size: 17px;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
+  font-weight: 700;
 }
 
 .resume-paper p {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: #334155;
-  line-height: 1.75;
+  line-height: 1.8;
   font-size: 14px;
 }
 
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .tag-list span {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 8px;
-  background: var(--primary-soft);
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary-soft) 0%, var(--primary-soft) 100%);
   color: var(--primary);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
+
+/* 模板样式优化 */
 
 .template-blue .resume-head {
   border-bottom-color: var(--amber);
-  background: #132238;
+  background: linear-gradient(135deg, #132238 0%, #1a2d4a 100%);
   color: #ffffff;
-  margin: -42px -42px 0;
-  padding: 36px 42px 26px;
+  margin: -44px -48px 0;
+  padding: 40px 48px 28px;
 }
 
 .template-blue .resume-head p,
 .template-blue .resume-head ul {
-  color: #dbeafe;
+  color: #bfdbfe;
 }
 
 .template-blue h3 {
@@ -592,14 +701,14 @@ textarea:focus {
 }
 
 .template-blue .tag-list span {
-  background: #fff4d6;
-  color: #8a5b18;
+  background: linear-gradient(135deg, #fff4d6 0%, #fef3c7 100%);
+  color: #92400e;
 }
 
 .template-sidebar {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 32px;
   padding: 0;
 }
 
@@ -607,28 +716,28 @@ textarea:focus {
   display: block;
   grid-row: 1 / span 5;
   min-height: 1123px;
-  padding: 36px 24px;
+  padding: 40px 28px;
   border: 0;
-  background: #16202d;
+  background: linear-gradient(180deg, #16202d 0%, #1a2636 100%);
   color: #ffffff;
 }
 
 .template-sidebar .resume-head h2 {
-  font-size: 30px;
+  font-size: 32px;
 }
 
 .template-sidebar .resume-head p,
 .template-sidebar .resume-head ul {
-  color: #d8e0ea;
+  color: #cbd5e1;
   text-align: left;
 }
 
 .template-sidebar section {
-  margin-right: 36px;
+  margin-right: 40px;
 }
 
 .template-sidebar section:first-of-type {
-  margin-top: 42px;
+  margin-top: 44px;
 }
 
 .template-gray .resume-head {
@@ -640,8 +749,8 @@ textarea:focus {
 }
 
 .template-gray .tag-list span {
-  background: #eef2f7;
-  color: #334155;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
 }
 
 .template-classic {
@@ -673,7 +782,7 @@ textarea:focus {
 
 .template-timeline section {
   position: relative;
-  padding-left: 26px;
+  padding-left: 28px;
   border-left: 2px solid var(--primary);
 }
 
@@ -685,14 +794,15 @@ textarea:focus {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .template-professional .resume-head {
-  margin: -42px -42px 0;
-  padding: 34px 42px 28px;
+  margin: -44px -48px 0;
+  padding: 38px 48px 30px;
   border: 0;
-  background: #111827;
+  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
   color: #ffffff;
 }
 
@@ -707,34 +817,36 @@ textarea:focus {
 
 .template-compact {
   min-height: 0;
-  padding: 30px 34px;
+  padding: 32px 38px;
 }
 
 .template-compact .resume-head {
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 }
 
 .template-compact .resume-head h2 {
-  font-size: 28px;
+  font-size: 30px;
 }
 
 .template-compact section {
-  margin-top: 15px;
+  margin-top: 18px;
 }
 
 .template-compact p {
-  line-height: 1.55;
+  line-height: 1.6;
 }
+
+/* 评分面板优化 */
 
 .score-panel {
   text-align: center;
 }
 
 .local-note {
-  margin: -3px 0 12px;
+  margin: -3px 0 14px;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.55;
+  line-height: 1.6;
   text-align: left;
 }
 
@@ -742,56 +854,58 @@ textarea:focus {
   display: inline-flex;
   align-items: flex-end;
   justify-content: center;
-  width: 124px;
-  height: 124px;
-  margin: 4px auto 10px;
-  border: 10px solid var(--primary-soft);
+  width: 130px;
+  height: 130px;
+  margin: 6px auto 12px;
+  border: 11px solid var(--primary-soft);
   border-top-color: var(--primary);
   border-radius: 50%;
-  padding-bottom: 30px;
+  padding-bottom: 32px;
+  transition: all var(--transition-normal);
 }
 
 .score-ring strong {
   color: var(--primary);
-  font-size: 40px;
+  font-size: 44px;
   line-height: 0.9;
 }
 
 .score-ring small {
   margin-left: 2px;
   color: var(--muted);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 #scoreLevel {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: var(--primary);
-  font-weight: 900;
+  font-weight: 800;
+  font-size: 15px;
 }
 
 .tips {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 20px;
   text-align: left;
   color: var(--muted);
   font-size: 13px;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 
 .target-box {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .result-box {
-  margin-top: 12px;
-  padding: 12px;
-  min-height: 74px;
+  margin-top: 14px;
+  padding: 14px;
+  min-height: 80px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: #ffffff;
   color: #334155;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.75;
   white-space: pre-wrap;
 }
 
@@ -803,6 +917,10 @@ textarea:focus {
 body[data-lang="en"] .result-box:empty::before {
   content: "Waiting for analysis";
 }
+
+/* ========================================
+   响应式适配优化
+   ======================================== */
 
 @media (max-width: 1180px) {
   .app-shell {
@@ -826,16 +944,43 @@ body[data-lang="en"] .result-box:empty::before {
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
+  .entry-screen {
+    padding: 32px 24px;
+  }
+
+  .entry-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    min-height: auto;
+  }
+
+  .entry-copy h1 {
+    font-size: 42px;
+  }
+
+  .entry-copy p {
+    font-size: 16px;
+  }
+
+  .entry-panel {
+    padding: 24px;
+  }
+
+  .entry-options,
+  .theme-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .control-pane,
   .assistant-pane,
   .paper-stage {
-    padding: 14px;
+    padding: 16px;
   }
 
   .form-grid,
   .case-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .topbar,
@@ -846,79 +991,751 @@ body[data-lang="en"] .result-box:empty::before {
   }
 
   .resume-paper {
-    padding: 24px;
+    padding: 28px;
   }
 
   .template-blue .resume-head {
-    margin: -24px -24px 0;
-    padding: 26px 24px;
+    margin: -28px -28px 0;
+    padding: 28px;
   }
 
   .template-sidebar {
     display: block;
-    padding: 24px;
+    padding: 28px;
   }
 
   .template-sidebar .resume-head {
     min-height: 0;
-    margin: -24px -24px 24px;
+    margin: -28px -28px 28px;
   }
 
   .template-professional .resume-head {
-    margin: -24px -24px 0;
-    padding: 26px 24px;
+    margin: -28px -28px 0;
+    padding: 28px;
   }
 
   .template-sidebar section {
     margin-right: 0;
   }
+}
 
+@media (max-width: 720px) {
   .entry-screen {
-    padding: 20px;
-  }
-
-  .entry-grid {
-    grid-template-columns: 1fr;
-    min-height: auto;
+    padding: 24px 16px;
   }
 
   .entry-copy h1 {
-    font-size: 38px;
+    font-size: 32px;
+  }
+
+  .entry-copy p {
+    font-size: 15px;
+  }
+
+  .entry-panel {
+    padding: 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .entry-section {
+    margin-bottom: 18px;
   }
 
   .entry-options,
   .theme-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .entry-choice,
+  .lang-choice,
+  .theme-dot {
+    min-height: 40px;
+  }
+
+  .start-btn {
+    min-height: 48px;
+    margin-top: 20px;
+  }
+
+  .control-pane {
+    padding: 14px;
+  }
+
+  .brand {
+    min-height: 54px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+
+  .panel {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .form-grid,
+  .case-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .case-btn {
+    min-height: 40px;
+  }
+
+  .topbar {
+    min-height: auto;
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toolbar label {
+    min-width: 100%;
+  }
+
+  .toolbar button,
+  .primary-action {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .paper-stage {
+    padding: 14px;
+  }
+
+  .resume-paper {
+    padding: 20px;
+    border-radius: 2px;
+  }
+
+  .resume-head {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .resume-head h2 {
+    font-size: 28px;
+  }
+
+  .resume-head ul {
+    text-align: left;
+  }
+
+  .template-blue .resume-head {
+    margin: -20px -20px 0;
+    padding: 24px 20px;
+  }
+
+  .template-sidebar {
+    padding: 20px;
+  }
+
+  .template-sidebar .resume-head {
+    margin: -20px -20px 20px;
+    padding: 24px 20px;
+  }
+
+  .template-professional .resume-head {
+    margin: -20px -20px 0;
+    padding: 24px 20px;
+  }
+
+  .template-compact {
+    padding: 20px;
+  }
+
+  .assistant-pane {
+    padding: 14px;
+  }
+
+  .score-ring {
+    width: 110px;
+    height: 110px;
+    border-width: 9px;
+    padding-bottom: 26px;
+  }
+
+  .score-ring strong {
+    font-size: 36px;
   }
 }
 
-@media print {
-  body {
-    background: #ffffff;
+@media (max-width: 480px) {
+  .entry-screen {
+    padding: 20px 12px;
   }
 
+  .entry-kicker {
+    font-size: 12px;
+    padding: 0 12px;
+    min-height: 28px;
+  }
+
+  .entry-copy h1 {
+    font-size: 26px;
+    margin: 16px 0 12px;
+  }
+
+  .entry-copy p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .entry-panel {
+    padding: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .entry-section h2 {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .entry-options,
+  .theme-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .entry-choice,
+  .lang-choice,
+  .theme-dot {
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .start-btn {
+    min-height: 44px;
+    font-size: 14px;
+    margin-top: 16px;
+  }
+
+  .control-pane {
+    padding: 12px;
+  }
+
+  .brand {
+    gap: 10px;
+    min-height: 48px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+  }
+
+  .brand h1 {
+    font-size: 17px;
+  }
+
+  .brand p {
+    font-size: 11px;
+  }
+
+  .privacy-note {
+    padding: 10px 12px;
+  }
+
+  .privacy-note strong {
+    font-size: 12px;
+  }
+
+  .privacy-note span {
+    font-size: 11px;
+  }
+
+  .panel {
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: var(--radius-sm);
+  }
+
+  .panel-title {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+
+  .panel-title span {
+    width: 28px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .panel-title h2 {
+    font-size: 14px;
+  }
+
+  .form-grid {
+    gap: 10px;
+  }
+
+  label {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 9px 11px;
+    font-size: 14px;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+
+  .case-btn {
+    min-height: 36px;
+    font-size: 12px;
+  }
+
+  .topbar {
+    padding: 10px 12px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+  }
+
+  .topbar strong {
+    font-size: 17px;
+  }
+
+  .toolbar button,
+  .primary-action {
+    min-height: 38px;
+    font-size: 12px;
+    padding: 0 14px;
+  }
+
+  .paper-stage {
+    padding: 10px;
+  }
+
+  .resume-paper {
+    padding: 16px;
+  }
+
+  .resume-head {
+    padding-bottom: 16px;
+    gap: 12px;
+  }
+
+  .resume-head h2 {
+    font-size: 22px;
+  }
+
+  .resume-head p {
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  .resume-head ul {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .resume-paper section {
+    margin-top: 16px;
+  }
+
+  .resume-paper h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .resume-paper p {
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: 6px;
+  }
+
+  .tag-list {
+    gap: 6px;
+  }
+
+  .tag-list span {
+    min-height: 26px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .template-blue .resume-head,
+  .template-professional .resume-head {
+    margin: -16px -16px 0;
+    padding: 20px 16px;
+  }
+
+  .template-sidebar {
+    padding: 16px;
+  }
+
+  .template-sidebar .resume-head {
+    margin: -16px -16px 16px;
+    padding: 20px 16px;
+  }
+
+  .template-compact {
+    padding: 14px;
+  }
+
+  .template-compact .resume-head h2 {
+    font-size: 20px;
+  }
+
+  .template-timeline section {
+    padding-left: 20px;
+    border-left-width: 1px;
+  }
+
+  .template-timeline section::before {
+    width: 8px;
+    height: 8px;
+    left: -5px;
+  }
+
+  .assistant-pane {
+    padding: 12px;
+  }
+
+  .score-ring {
+    width: 100px;
+    height: 100px;
+    border-width: 8px;
+    padding-bottom: 22px;
+  }
+
+  .score-ring strong {
+    font-size: 32px;
+  }
+
+  #scoreLevel {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .tips {
+    font-size: 12px;
+    padding-left: 16px;
+    line-height: 1.6;
+  }
+
+  .result-box {
+    padding: 12px;
+    font-size: 12px;
+    min-height: 60px;
+  }
+}
+
+/* ========================================
+   打印样式优化
+   ======================================== */
+
+@media print {
+  /* 重置页面背景和颜色 */
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* 隐藏所有控制面板和工具栏 */
   .control-pane,
   .assistant-pane,
-  .topbar {
+  .topbar,
+  .brand,
+  .privacy-note,
+  .toolbar,
+  .start-btn,
+  .entry-screen,
+  .entry-panel,
+  .score-panel,
+  .target-box,
+  .result-box,
+  button,
+  .primary-action {
+    display: none !important;
+  }
+
+  /* 重置布局为单列 */
+  .app-shell {
+    display: block;
+    width: 100%;
+    max-width: none;
+  }
+
+  /* 预览区域全屏显示 */
+  .preview-pane,
+  .paper-stage {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: #ffffff;
+    overflow: visible;
+    min-height: auto;
+  }
+
+  /* 简历纸张打印优化 */
+  .resume-paper {
+    width: 100%;
+    max-width: 210mm;
+    min-height: auto;
+    margin: 0;
+    padding: 15mm 20mm;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background: #ffffff;
+    color: #000000;
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+
+  /* 简历头部打印样式 */
+  .resume-head {
+    display: block;
+    padding-bottom: 12pt;
+    border-bottom: 2pt solid #000000;
+    margin-bottom: 12pt;
+  }
+
+  .resume-head h2 {
+    font-size: 18pt;
+    color: #000000;
+    margin: 0 0 6pt 0;
+  }
+
+  .resume-head p {
+    font-size: 11pt;
+    color: #333333;
+    margin: 0 0 6pt 0;
+  }
+
+  .resume-head ul {
+    list-style: none;
+    padding: 0;
+    margin: 6pt 0 0 0;
+    text-align: left;
+    color: #333333;
+    font-size: 10pt;
+  }
+
+  /* 简历内容区块打印样式 */
+  .resume-paper section {
+    margin-top: 14pt;
+    page-break-inside: avoid;
+  }
+
+  .resume-paper h3 {
+    font-size: 12pt;
+    color: #000000;
+    margin: 0 0 8pt 0;
+    border-bottom: 1pt solid #cccccc;
+    padding-bottom: 4pt;
+  }
+
+  .resume-paper p {
+    font-size: 10pt;
+    color: #333333;
+    line-height: 1.6;
+    margin: 0 0 6pt 0;
+  }
+
+  /* 标签打印样式 */
+  .tag-list {
+    display: block;
+    margin: 6pt 0;
+  }
+
+  .tag-list span {
+    display: inline-block;
+    padding: 2pt 6pt;
+    margin: 2pt 4pt 2pt 0;
+    border: 1pt solid #cccccc;
+    border-radius: 2pt;
+    background: #f5f5f5;
+    color: #333333;
+    font-size: 9pt;
+  }
+
+  /* 模板打印样式重置 */
+  .template-blue .resume-head,
+  .template-professional .resume-head {
+    margin: -15mm -20mm 12pt;
+    padding: 12mm 20mm;
+    background: #f0f0f0;
+    color: #000000;
+    border-bottom: 2pt solid #000000;
+  }
+
+  .template-blue .resume-head p,
+  .template-blue .resume-head ul,
+  .template-professional .resume-head p,
+  .template-professional .resume-head ul {
+    color: #333333;
+  }
+
+  .template-blue h3,
+  .template-professional h3 {
+    color: #000000;
+  }
+
+  .template-sidebar {
+    display: block;
+    padding: 0;
+  }
+
+  .template-sidebar .resume-head {
+    min-height: auto;
+    margin: -15mm -20mm 12pt;
+    padding: 12mm 20mm;
+    background: #f0f0f0;
+    color: #000000;
+    border: none;
+    border-bottom: 2pt solid #000000;
+  }
+
+  .template-sidebar section {
+    margin-right: 0;
+    margin-top: 14pt;
+  }
+
+  .template-sidebar section:first-of-type {
+    margin-top: 12pt;
+  }
+
+  .template-classic {
+    border: 1pt solid #000000;
+  }
+
+  .template-classic .resume-head {
+    border-bottom: 2pt solid #000000;
+  }
+
+  .template-classic h3 {
+    color: #000000;
+  }
+
+  .template-minimal {
+    border: none;
+  }
+
+  .template-minimal .resume-head {
+    border-bottom: 1pt solid #cccccc;
+  }
+
+  .template-minimal h3 {
+    color: #000000;
+  }
+
+  .template-timeline section {
+    border-left: 2pt solid #000000;
+    padding-left: 12pt;
+  }
+
+  .template-timeline section::before {
+    width: 8pt;
+    height: 8pt;
+    background: #000000;
+    border: none;
+    box-shadow: none;
+  }
+
+  .template-gray .resume-head {
+    border-bottom-color: #666666;
+  }
+
+  .template-gray h3 {
+    color: #000000;
+  }
+
+  .template-gray .tag-list span {
+    background: #f0f0f0;
+    color: #333333;
+    border: 1pt solid #cccccc;
+  }
+
+  .template-compact {
+    padding: 10mm 15mm;
+  }
+
+  .template-compact .resume-head {
+    padding-bottom: 8pt;
+  }
+
+  .template-compact .resume-head h2 {
+    font-size: 16pt;
+  }
+
+  .template-compact section {
+    margin-top: 10pt;
+  }
+
+  .template-compact p {
+    line-height: 1.5;
+  }
+
+  /* 打印分页控制 */
+  .resume-paper section {
+    page-break-inside: avoid;
+  }
+
+  /* 隐藏所有链接装饰 */
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* 强制黑白打印 */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+}
+
+/* 打印预览模式（可选） */
+@media screen and (max-width: 800px) {
+  .print-preview .control-pane,
+  .print-preview .assistant-pane,
+  .print-preview .topbar {
     display: none;
   }
 
-  .app-shell {
+  .print-preview .app-shell {
     display: block;
   }
 
-  .preview-pane,
-  .paper-stage {
+  .print-preview .preview-pane,
+  .print-preview .paper-stage {
     display: block;
     padding: 0;
     background: #ffffff;
   }
 
-  .resume-paper {
+  .print-preview .resume-paper {
     width: 100%;
-    min-height: 0;
-    margin: 0;
+    max-width: 210mm;
+    min-height: auto;
+    margin: 0 auto;
     box-shadow: none;
-    border-radius: 0;
+    border: 1px solid #e0e0e0;
   }
 }
