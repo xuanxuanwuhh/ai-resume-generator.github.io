@@ -12,6 +12,44 @@ $ExampleUrls = @(
     "http://127.0.0.1:4000/?case=postgraduate&template=timeline&theme=forest"
 )
 
+function Resolve-Tool {
+    param(
+        [string[]] $Candidates,
+        [string] $Label
+    )
+
+    foreach ($candidate in $Candidates) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) {
+            continue
+        }
+
+        if (Test-Path -LiteralPath $candidate) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+
+    foreach ($candidate in $Candidates) {
+        $command = Get-Command $candidate -ErrorAction SilentlyContinue
+        if ($command) {
+            if ($command.Source) { return $command.Source }
+            if ($command.Path) { return $command.Path }
+            return $command.Name
+        }
+    }
+
+    throw "$Label is not available. Install Docker Desktop first."
+}
+
+$DockerExe = Resolve-Tool @(
+    "$env:ProgramFiles\Docker\Docker\Docker\resources\bin\docker.exe"
+    "docker"
+) "Docker CLI"
+
+$ComposeExe = Resolve-Tool @(
+    "$env:ProgramFiles\Docker\Docker\cli-plugins\docker-compose.exe"
+    "docker-compose"
+) "Docker Compose"
+
 function Normalize-Path {
     param(
         [string] $Path
@@ -31,18 +69,14 @@ function Normalize-Path {
 }
 
 function Assert-DockerAvailable {
-    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-        throw "Docker CLI is not available in PATH. Install Docker Desktop first."
-    }
-
-    & docker version | Out-Null
+    & $DockerExe version | Out-Null
     if ($LASTEXITCODE -ne 0) {
         throw "Docker Desktop is not running or the Docker daemon is unavailable."
     }
 
-    & docker compose version | Out-Null
+    & $ComposeExe version | Out-Null
     if ($LASTEXITCODE -ne 0) {
-        throw "docker compose is unavailable."
+        throw "Docker Compose is unavailable."
     }
 }
 
@@ -50,12 +84,12 @@ function Remove-ProjectContainers {
     $normalizedProjectRoot = Normalize-Path $ProjectRoot
 
     Write-Host "Stopping compose services for this project..."
-    & docker compose down --remove-orphans
+    & $ComposeExe down --remove-orphans
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to stop existing compose services."
     }
 
-    $containerIds = @(& docker ps -aq 2>$null)
+    $containerIds = @(& $DockerExe ps -aq 2>$null)
     if (-not $containerIds) {
         return
     }
@@ -65,7 +99,7 @@ function Remove-ProjectContainers {
             continue
         }
 
-        $inspectJson = & docker inspect $containerId 2>$null
+        $inspectJson = & $DockerExe inspect $containerId 2>$null
         if ($LASTEXITCODE -ne 0 -or -not $inspectJson) {
             continue
         }
@@ -124,7 +158,7 @@ function Get-ListenerRows {
 
 function Assert-Port4000Available {
     for ($attempt = 1; $attempt -le 5; $attempt++) {
-        $dockerConflicts = @(& docker ps --filter "publish=4000" --format "{{.ID}}|{{.Image}}|{{.Names}}|{{.Ports}}" 2>$null | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+        $dockerConflicts = @(& $DockerExe ps --filter "publish=4000" --format "{{.ID}}|{{.Image}}|{{.Names}}|{{.Ports}}" 2>$null | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
         if ($dockerConflicts.Count -gt 0) {
             $details = $dockerConflicts -join [Environment]::NewLine
             throw "Port 4000 is already published by another Docker container.`n$details"
@@ -171,7 +205,7 @@ function Wait-ForSite {
         Start-Sleep -Seconds 2
     }
 
-    $logs = @(& docker compose logs --tail 80 jekyll 2>&1)
+    $logs = @(& $ComposeExe logs --tail 80 jekyll 2>&1)
     $message = ($logs -join [Environment]::NewLine)
     throw "Jekyll did not become ready within 180 seconds.`n$message"
 }
@@ -186,7 +220,7 @@ try {
     Reset-SiteOutput
 
     Write-Host "Starting Jekyll with docker compose..."
-    & docker compose up -d
+    & $ComposeExe up -d
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to start docker compose service."
     }
