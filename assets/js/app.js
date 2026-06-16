@@ -1,4 +1,208 @@
 (function () {
+  function applyGlassStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .glass-button {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 12px;
+        color: inherit;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+      .glass-button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      }
+      .glass-button.active {
+        background: rgba(99, 102, 241, 0.4);
+        border-color: rgba(99, 102, 241, 0.6);
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+      }
+      .glass-button:active {
+        transform: translateY(0);
+      }
+      .theme-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .theme-dot:hover {
+        transform: scale(1.15);
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+      .theme-dot.active {
+        transform: scale(1.2);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+      }
+      .lang-btn {
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .lang-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
+      .lang-btn.active {
+        background: rgba(99, 102, 241, 0.5);
+        border-color: rgba(99, 102, 241, 0.7);
+      }
+      .entry-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      #startBtn {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.6) 0%, rgba(168, 85, 247, 0.6) 100%);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        padding: 14px 40px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        color: white;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+      }
+      #startBtn:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.8) 0%, rgba(168, 85, 247, 0.8) 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+      }
+      .case-btn {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 10px 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+      }
+      .case-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      .case-btn.active {
+        background: rgba(99, 102, 241, 0.5);
+        border-color: rgba(99, 102, 241, 0.6);
+      }
+      .control-pane {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .assistant-pane {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      select {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: inherit;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      select:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      select:focus {
+        outline: none;
+        border-color: rgba(99, 102, 241, 0.6);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+      input, textarea {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: inherit;
+        transition: all 0.3s ease;
+      }
+      input:focus, textarea:focus {
+        outline: none;
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .resume-paper {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      }
+      .panel-title {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      #matchBtn, #optimizeBtn, #printBtn {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 10px 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      #matchBtn:hover, #optimizeBtn:hover, #printBtn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .entry-copy h1 {
+        text-shadow: 0 2px 20px rgba(99, 102, 241, 0.3);
+      }
+      .entry-screen {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 1) 0%, rgba(30, 41, 59, 1) 50%, rgba(15, 23, 42, 1) 100%);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  applyGlassStyle();
+
   const cases = {
     job: {
       zh: { title: "岗位投递版", hint: "重点呈现岗位相关课程、项目实践和可验证技能。" },
@@ -514,6 +718,31 @@
     analyzeMatch();
     generateAdvice();
   }
+
+  function initGlassClasses() {
+    entryCaseButtons.forEach((button) => button.classList.add("glass-button"));
+    caseButtons.forEach((button) => button.classList.add("case-btn"));
+    themeDots.forEach((button) => button.classList.add("theme-dot"));
+    langButtons.forEach((button) => button.classList.add("lang-btn"));
+    document.querySelectorAll(".entry-section").forEach((section) => section.classList.add("entry-section"));
+    document.querySelectorAll(".control-pane").forEach((pane) => pane.classList.add("control-pane"));
+    document.querySelectorAll(".assistant-pane").forEach((pane) => pane.classList.add("assistant-pane"));
+    document.querySelectorAll(".panel-title").forEach((title) => title.classList.add("panel-title"));
+    document.querySelectorAll("select").forEach((select) => {
+      select.style.background = "rgba(255, 255, 255, 0.1)";
+      select.style.backdropFilter = "blur(8px)";
+      select.style.border = "1px solid rgba(255, 255, 255, 0.2)";
+      select.style.borderRadius = "8px";
+    });
+    document.querySelectorAll("input, textarea").forEach((input) => {
+      input.style.background = "rgba(255, 255, 255, 0.08)";
+      input.style.backdropFilter = "blur(8px)";
+      input.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+      input.style.borderRadius = "8px";
+    });
+  }
+
+  initGlassClasses();
 
   form.addEventListener("input", renderResume);
   caseButtons.forEach((button) => {
