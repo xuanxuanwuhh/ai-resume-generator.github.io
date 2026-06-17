@@ -1,0 +1,268 @@
+---
+layout: null
+title: 简历生成与优化工作台
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body data-theme="aurora" data-lang="zh">
+  <section id="entryScreen" class="entry-screen" aria-label="入口选择">
+    <div class="entry-grid">
+      <div class="entry-copy">
+        <span class="entry-kicker">Jekyll Static Studio</span>
+        <h1>简历生成与优化工作台</h1>
+        <p>先选择材料场景、视觉模板、主题色和界面语言，再进入简历生成界面。静态站默认使用本地规则建议，不伪装成真实大模型。</p>
+      </div>
+
+      <div class="entry-panel">
+        <div class="entry-section">
+          <h2>材料场景</h2>
+          <div class="entry-options" role="group" aria-label="入口材料场景">
+            <button class="entry-choice active" type="button" data-entry-case="job">求职</button>
+            <button class="entry-choice" type="button" data-entry-case="postgraduate">考研</button>
+            <button class="entry-choice" type="button" data-entry-case="recommendation">保研</button>
+            <button class="entry-choice" type="button" data-entry-case="admission">升学</button>
+          </div>
+        </div>
+
+        <div class="entry-section">
+          <h2>模板与主题</h2>
+          <label>
+            简历模板
+            <select id="entryTemplate">
+              <option value="modern">现代通用</option>
+              <option value="blue">蓝金正式</option>
+              <option value="sidebar">侧栏信息</option>
+              <option value="gray">蓝灰团队</option>
+              <option value="classic">经典单栏</option>
+              <option value="minimal">极简投递</option>
+              <option value="timeline">时间线项目</option>
+              <option value="professional">专业沉稳</option>
+              <option value="compact">紧凑信息</option>
+            </select>
+          </label>
+          <div class="theme-options" role="group" aria-label="主题颜色">
+            <button class="theme-dot active" type="button" data-theme-choice="aurora" title="极光蓝">蓝</button>
+            <button class="theme-dot" type="button" data-theme-choice="forest" title="森林绿">绿</button>
+            <button class="theme-dot" type="button" data-theme-choice="ember" title="琥珀橙">橙</button>
+            <button class="theme-dot" type="button" data-theme-choice="violet" title="学院紫">紫</button>
+          </div>
+        </div>
+
+        <div class="entry-section">
+          <h2>语言</h2>
+          <div class="entry-options two" role="group" aria-label="界面语言">
+            <button class="lang-choice active" type="button" data-lang-choice="zh">中文</button>
+            <button class="lang-choice" type="button" data-lang-choice="en">English</button>
+          </div>
+        </div>
+
+        <button id="startBtn" class="start-btn" type="button">进入工作台</button>
+      </div>
+    </div>
+  </section>
+
+  <main id="appShell" class="app-shell is-hidden">
+    <aside class="control-pane" aria-label="简历编辑区">
+      <header class="brand">
+        <span class="brand-mark">CV</span>
+        <div>
+          <h1>简历生成与优化工作台</h1>
+          <p>Jekyll 静态网站 · 本地规则建议</p>
+        </div>
+      </header>
+
+      <div class="privacy-note">
+        <strong>演示数据</strong>
+        <span>页面示例不使用真实个人信息，所有评分与匹配均在浏览器本地完成。</span>
+      </div>
+
+      <section class="panel compact">
+        <div class="panel-title">
+          <span>01</span>
+          <h2>选择材料场景</h2>
+        </div>
+        <div class="case-grid" role="group" aria-label="材料场景">
+          <button class="case-btn active" type="button" data-case="job">求职</button>
+          <button class="case-btn" type="button" data-case="postgraduate">考研</button>
+          <button class="case-btn" type="button" data-case="recommendation">保研</button>
+          <button class="case-btn" type="button" data-case="admission">升学</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span>02</span>
+          <h2>填写核心信息</h2>
+        </div>
+        <form id="resumeForm" class="form-grid">
+          <label>
+            姓名
+            <input name="name" value="示例学生" autocomplete="name">
+          </label>
+          <label>
+            定位
+            <input name="title" value="计算机方向申请者 / Web 项目实践者">
+          </label>
+          <label>
+            邮箱
+            <input name="email" value="demo@example.com" autocomplete="email">
+          </label>
+          <label>
+            电话
+            <input name="phone" value="000-0000-0000" autocomplete="tel">
+          </label>
+          <label>
+            学校
+            <input name="school" value="示例大学">
+          </label>
+          <label>
+            专业
+            <input name="major" value="计算机类专业">
+          </label>
+          <label class="wide">
+            个人简介
+            <textarea name="summary" rows="4">具备 Web 前端、静态网站构建和项目文档整理基础，能够完成从需求分析、界面设计、交互实现到运行验证的完整实践流程。关注材料结构化表达、用户体验、隐私保护和可复现交付。</textarea>
+          </label>
+          <label class="wide">
+            项目经历
+            <textarea name="project" rows="5">Jekyll 简历生成与优化工作台：基于静态网站技术重新实现简历生成器，完成场景选择、信息编辑、实时预览、模板切换、本地材料评分和目标匹配等模块，实现无需后端即可运行和部署的课程项目版本。</textarea>
+          </label>
+          <label class="wide">
+            技能关键词
+            <input name="skills" value="HTML, CSS, JavaScript, Jekyll, Git, 信息架构, 交互设计, 文档写作">
+          </label>
+          <label class="wide">
+            奖项证书
+            <input name="awards" value="创新实验课程项目实践、Web开发综合训练">
+          </label>
+        </form>
+      </section>
+    </aside>
+
+    <section class="preview-pane" aria-label="简历预览区">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">实时预览</span>
+          <strong id="caseTitle">岗位投递版</strong>
+        </div>
+        <div class="toolbar">
+          <label>
+            模板
+            <select id="templateSelect">
+              <option value="modern">现代通用</option>
+              <option value="blue">蓝金正式</option>
+              <option value="sidebar">侧栏信息</option>
+              <option value="gray">蓝灰团队</option>
+              <option value="classic">经典单栏</option>
+              <option value="minimal">极简投递</option>
+              <option value="timeline">时间线项目</option>
+              <option value="professional">专业沉稳</option>
+              <option value="compact">紧凑信息</option>
+            </select>
+          </label>
+          <label>
+            主题
+            <select id="themeSelect">
+              <option value="aurora">极光蓝</option>
+              <option value="forest">森林绿</option>
+              <option value="ember">琥珀橙</option>
+              <option value="violet">学院紫</option>
+            </select>
+          </label>
+          <label>
+            语言
+            <select id="languageSelect">
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <button id="printBtn" type="button">导出 PDF</button>
+        </div>
+      </header>
+
+      <div class="paper-stage">
+        <article id="resumePaper" class="resume-paper template-modern">
+          <header class="resume-head">
+            <div>
+              <h2 data-bind="name">示例学生</h2>
+              <p data-bind="title">计算机方向申请者 / Web 项目实践者</p>
+            </div>
+            <ul>
+              <li data-bind="email">demo@example.com</li>
+              <li data-bind="phone">000-0000-0000</li>
+            </ul>
+          </header>
+
+          <section>
+            <h3>个人简介</h3>
+            <p data-bind="summary"></p>
+          </section>
+          <section>
+            <h3>教育背景</h3>
+            <p><strong data-bind="school"></strong> · <span data-bind="major"></span></p>
+            <p id="educationHint">重点呈现岗位相关课程、项目实践和可验证技能。</p>
+          </section>
+          <section>
+            <h3>项目经历</h3>
+            <p data-bind="project"></p>
+          </section>
+          <section class="tag-section">
+            <h3>技能关键词</h3>
+            <div id="skillTags" class="tag-list"></div>
+          </section>
+          <section>
+            <h3>奖项证书</h3>
+            <p data-bind="awards"></p>
+          </section>
+        </article>
+      </div>
+    </section>
+
+    <aside class="assistant-pane" aria-label="本地规则建议区">
+      <section class="panel score-panel">
+        <div class="panel-title">
+          <span>03</span>
+          <h2>本地规则评分</h2>
+        </div>
+        <p class="local-note">所有评分与匹配均在浏览器本地完成。</p>
+        <div class="score-ring">
+          <strong id="scoreValue">0</strong>
+          <small>/100</small>
+        </div>
+        <p id="scoreLevel">待评估</p>
+        <ul id="scoreTips" class="tips"></ul>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span>04</span>
+          <h2>本地目标匹配</h2>
+        </div>
+        <label class="target-box">
+          粘贴岗位 JD / 院校要求
+          <textarea id="targetInput" rows="6">前端开发实习生，要求熟悉 HTML、CSS、JavaScript，了解 Vue 或静态网站开发，有项目实践、文档能力和良好的沟通协作能力。</textarea>
+        </label>
+        <button id="matchBtn" class="primary-action" type="button">运行本地匹配</button>
+        <div id="matchResult" class="result-box"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <span>05</span>
+          <h2>本地优化建议</h2>
+        </div>
+        <button id="optimizeBtn" class="primary-action secondary" type="button">生成优化建议</button>
+        <div id="optimizeResult" class="result-box"></div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="{{ '/assets/js/app.js' | relative_url }}"></script>
+</body>
+</html>

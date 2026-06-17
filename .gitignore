@@ -18,3 +18,9 @@ desktop.ini
 *.log
 *.tmp
 *.bak
+
+# Flutter OCR API local environment
+flutter-api/.env
+flutter-api/.venv/
+flutter-api/__pycache__/
+flutter-api/**/*.pyc

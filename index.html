@@ -1,6 +1,6 @@
 ---
 layout: null
-title: AI 简历工作台升级入口
+title: AI Resume Generator Project Overview
 ---
 <!doctype html>
 <html lang="zh-CN">
@@ -8,266 +8,325 @@ title: AI 简历工作台升级入口
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page.title }}</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --bg: #f4f7fb;
-      --panel: #ffffff;
-      --text: #182230;
-      --muted: #5f6b7a;
-      --line: #dbe3ef;
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --soft: #eef4ff;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 32%),
-        radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 24%),
-        var(--bg);
-    }
-
-    main {
-      width: min(1120px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 48px 0 56px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-      gap: 24px;
-      align-items: stretch;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
-    }
-
-    .hero-copy {
-      padding: 36px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      min-height: 32px;
-      align-items: center;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: var(--soft);
-      color: var(--primary-dark);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    h1 {
-      margin: 18px 0 14px;
-      font-size: clamp(32px, 5vw, 52px);
-      line-height: 1.08;
-    }
-
-    .lead {
-      margin: 0;
-      color: var(--muted);
-      font-size: 17px;
-      line-height: 1.75;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 26px;
-    }
-
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 48px;
-      padding: 0 18px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      color: var(--text);
-      background: #ffffff;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .button.primary {
-      border-color: var(--primary);
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: #ffffff;
-    }
-
-    .hero-side {
-      padding: 26px;
-    }
-
-    .hero-side h2,
-    .section h2 {
-      margin: 0 0 12px;
-      font-size: 20px;
-    }
-
-    .hero-side p,
-    .section p,
-    .section li {
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    .hero-side ul,
-    .section ul {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-      margin-top: 22px;
-    }
-
-    .section {
-      padding: 22px;
-    }
-
-    .chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .chip {
-      display: inline-flex;
-      min-height: 34px;
-      align-items: center;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: #f5f8fd;
-      border: 1px solid var(--line);
-      color: #3b4b60;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .notice {
-      margin-top: 22px;
-      padding: 16px 18px;
-      border-radius: 12px;
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      color: #9a3412;
-      line-height: 1.65;
-    }
-
-    code {
-      padding: 2px 6px;
-      border-radius: 6px;
-      background: #f2f5fa;
-      font-family: Consolas, monospace;
-      font-size: 13px;
-    }
-
-    @media (max-width: 960px) {
-      .hero,
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-copy,
-      .hero-side,
-      .section {
-        padding: 22px;
-      }
-    }
-  </style>
+  <meta
+    name="description"
+    content="AI Resume Generator 项目总览：保留 Jekyll 经典版，升级 Flutter Web 工作台，并提供独立 OCR API 后端。"
+  >
+  <link rel="stylesheet" href="{{ '/assets/css/landing.css' | relative_url }}">
 </head>
 <body>
-  <main>
-    <section class="hero">
-      <article class="panel hero-copy">
-        <span class="eyebrow">Jekyll 首页已改为升级入口</span>
-        <h1>简历编辑器已升级到 Flutter Web</h1>
-        <p class="lead">
-          旧的 Jekyll 工作台已经下线，原因是样式和交互继续堆在静态页里会越来越不稳，
-          尤其是“导出按钮显示异常”和“成绩单 OCR 需要后端密钥”这两类问题。现在根目录只保留一个稳定入口，
-          实际编辑、增删条目、成绩单识别都在 Flutter Web 版中完成。
-        </p>
-        <div class="actions">
-          <a class="button primary" href="{{ '/flutter-version/' | relative_url }}">打开 Flutter 工作台</a>
-          <a class="button" href="https://github.com/xuanxuanwuhh/ai-resume-generator.github.io">查看仓库</a>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="#top">
+        <span class="brand-mark">AR</span>
+        <span class="brand-copy">
+          <strong>AI Resume Generator</strong>
+          <small>Project Overview</small>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="主导航">
+        <a href="#overview">概览</a>
+        <a href="#versions">版本</a>
+        <a href="#architecture">架构</a>
+        <a href="#api">OCR API</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="ghost-link" href="{{ '/legacy-jekyll/' | relative_url }}">Jekyll 经典版</a>
+        <a class="ghost-link strong" href="{{ '/flutter-version/' | relative_url }}">Flutter 工作台</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <span class="eyebrow">Academic Project Case Study</span>
+            <h1>保留 Jekyll 经典版，同时升级到 Flutter 工作台</h1>
+            <p class="lead">
+              这个仓库现在不是单一页面，而是一个完整的项目矩阵：根页负责项目介绍与成果展示，
+              <code>legacy-jekyll</code> 保留原始静态简历生成器，<code>flutter-version</code> 负责更复杂的结构化编辑，
+              <code>flutter-api</code> 承接成绩单 OCR 的后端能力。
+            </p>
+
+            <div class="hero-actions">
+              <a class="button primary" href="{{ '/flutter-version/' | relative_url }}">打开 Flutter 工作台</a>
+              <a class="button" href="{{ '/legacy-jekyll/' | relative_url }}">打开 Jekyll 经典版</a>
+              <a class="button subtle" href="https://github.com/xuanxuanwuhh/ai-resume-generator.github.io">查看仓库</a>
+            </div>
+
+            <dl class="stats-row">
+              <div class="stat-card">
+                <dt>前端形态</dt>
+                <dd class="stat-value" data-count="3">0</dd>
+                <small>介绍页 / Jekyll / Flutter</small>
+              </div>
+              <div class="stat-card">
+                <dt>模板数量</dt>
+                <dd class="stat-value" data-count="9">0</dd>
+                <small>经典版模板保留</small>
+              </div>
+              <div class="stat-card">
+                <dt>核心 API</dt>
+                <dd class="stat-value" data-count="1">0</dd>
+                <small>OCR transcript parse</small>
+              </div>
+            </dl>
+          </div>
+
+          <div class="hero-media reveal">
+            <div class="showcase-stack" data-tilt>
+              <figure class="media-frame media-frame-large">
+                <img
+                  src="{{ '/report-assets/07-flutter-workbench.png' | relative_url }}"
+                  alt="Flutter 工作台截图"
+                >
+                <figcaption>
+                  <strong>Flutter Web Workbench</strong>
+                  <span>多条经历编辑、OCR 接口接入、右侧实时预览</span>
+                </figcaption>
+              </figure>
+
+              <figure class="media-frame media-frame-small media-frame-upper">
+                <img
+                  src="{{ '/report-assets/01-workspace.png' | relative_url }}"
+                  alt="Jekyll 经典版截图"
+                >
+                <figcaption>
+                  <strong>Jekyll Classic</strong>
+                  <span>无后端静态简历生成器</span>
+                </figcaption>
+              </figure>
+
+              <div class="floating-note media-frame media-frame-note">
+                <span class="note-kicker">OCR API</span>
+                <strong>FastAPI + PyMuPDF + Pillow + Aliyun OCR</strong>
+                <p>前端不保存密钥，统一通过后端代理上传与识别。</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="chip-row">
-          <span class="chip">多条教育经历</span>
-          <span class="chip">多条项目经历</span>
-          <span class="chip">成绩单 OCR 导入</span>
-          <span class="chip">右侧仅保留简历预览</span>
+      </section>
+
+      <section id="overview" class="section section-band reveal">
+        <div class="section-head">
+          <span class="section-index">01</span>
+          <div>
+            <h2>项目概览</h2>
+            <p>
+              根页不再承担复杂工作台逻辑，而是作为一个项目说明、成果展示和版本导航入口。
+              页面交互采用现代案例页常见的做法：分屏展示、滚动显隐、数字计数、截图层叠和轻量鼠标视差。
+            </p>
+          </div>
         </div>
-      </article>
 
-      <aside class="panel hero-side">
-        <h2>为什么不把密钥放到 Flutter 里</h2>
-        <p>
-          Flutter Web 最终仍然运行在浏览器里，本质上和 Jekyll 一样都是前端静态资源。
-          只要把 OCR 密钥写进页面，用户就能在网络请求或打包文件里拿到它。
-        </p>
-        <ul>
-          <li>正确做法：前端调用你自己的后端接口，后端读取 <code>.env</code> 里的阿里云密钥。</li>
-          <li>参考密钥文件：<code>D:\BiographicalNotes\ai-resume-backend\.env.example</code></li>
-          <li>在线 GitHub Pages 页面如果要调 OCR，后端还必须提供 HTTPS 和 CORS。</li>
-        </ul>
-      </aside>
-    </section>
-
-    <section class="grid">
-      <article class="panel section">
-        <h2>Flutter 版现在做了什么</h2>
-        <ul>
-          <li>左侧所有板块支持新增和删除。</li>
-          <li>支持教育、课程、经历、项目、技能、奖项多条录入。</li>
-          <li>支持上传成绩单并调用后端 OCR 接口，识别后勾选加入课程。</li>
-          <li>右侧移除本地建议区，只保留简历预览与导出。</li>
-        </ul>
-      </article>
-
-      <article class="panel section">
-        <h2>本地联调方式</h2>
-        <p>本地可以直接用参考项目后端：</p>
-        <ul>
-          <li>后端目录：<code>D:\BiographicalNotes\ai-resume-backend</code></li>
-          <li>OCR 地址默认：<code>http://127.0.0.1:8000</code></li>
-          <li>Flutter 页面中可以直接改 OCR 后端地址。</li>
-        </ul>
-      </article>
-
-      <article class="panel section">
-        <h2>线上限制</h2>
-        <p>
-          GitHub Pages 上的 Flutter 页面是 <code>https</code>，因此不能直接去调本地
-          <code>http://127.0.0.1:8000</code>。如果要线上也能 OCR，需要单独部署一个 HTTPS 后端。
-        </p>
-        <div class="notice">
-          这也是这次把静态页升级成 Flutter 工作台、同时把 OCR 设计成“前端只配地址，不存密钥”的核心原因。
+        <div class="feature-grid">
+          <article class="feature-card" data-tilt>
+            <span>Project Narrative</span>
+            <h3>更适合课程汇报</h3>
+            <p>介绍页聚焦项目目标、技术架构、版本差异和部署方式，更适合作为课程展示页和学术汇报入口。</p>
+          </article>
+          <article class="feature-card" data-tilt>
+            <span>Legacy Preservation</span>
+            <h3>旧版能力完整保留</h3>
+            <p>原始 Jekyll 简历生成器被迁移到独立路径，继续保留九种模板、主题切换、本地评分和导出能力。</p>
+          </article>
+          <article class="feature-card" data-tilt>
+            <span>Operational Upgrade</span>
+            <h3>新版本适合扩展</h3>
+            <p>Flutter 工作台承接多条结构化录入、后端 OCR 接口、部署级配置和未来 API 扩展。</p>
+          </article>
         </div>
-      </article>
-    </section>
-  </main>
+      </section>
+
+      <section id="versions" class="section reveal">
+        <div class="section-head">
+          <span class="section-index">02</span>
+          <div>
+            <h2>版本矩阵</h2>
+            <p>现在仓库内同时保留三个清晰角色：介绍页、Jekyll 经典版、Flutter 工作台。</p>
+          </div>
+        </div>
+
+        <div class="version-grid">
+          <article class="version-card">
+            <div class="version-top">
+              <strong>Root Introduction</strong>
+              <span>Jekyll Landing</span>
+            </div>
+            <h3>项目介绍页</h3>
+            <ul>
+              <li>用于课程展示、成果归档和入口导航</li>
+              <li>提供截图、技术栈、架构和部署说明</li>
+              <li>带有滚动显隐、计数和层叠截图动效</li>
+            </ul>
+            <a class="inline-link" href="#architecture">查看系统架构</a>
+          </article>
+
+          <article class="version-card emphasis">
+            <div class="version-top">
+              <strong>Flutter Web</strong>
+              <span>Main Editor</span>
+            </div>
+            <h3>Flutter 工作台</h3>
+            <ul>
+              <li>左侧支持教育、课程、经历、项目、技能、奖项多条增删</li>
+              <li>右侧只保留简历预览与导出 PDF</li>
+              <li>支持调用 OCR API 识别成绩单并导入课程</li>
+            </ul>
+            <a class="inline-link" href="{{ '/flutter-version/' | relative_url }}">进入 Flutter 工作台</a>
+          </article>
+
+          <article class="version-card">
+            <div class="version-top">
+              <strong>Jekyll Classic</strong>
+              <span>Legacy Generator</span>
+            </div>
+            <h3>Jekyll 经典版</h3>
+            <ul>
+              <li>保留最初课程作业形态</li>
+              <li>无需后端即可完成模板切换、本地评分和导出</li>
+              <li>适合对比静态站与应用化前端的差异</li>
+            </ul>
+            <a class="inline-link" href="{{ '/legacy-jekyll/' | relative_url }}">打开 Jekyll 经典版</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="section gallery-section reveal">
+        <div class="section-head">
+          <span class="section-index">03</span>
+          <div>
+            <h2>界面展示</h2>
+            <p>用真实界面截图而不是抽象图标，直接展示两个前端版本的实际完成度。</p>
+          </div>
+        </div>
+
+        <div class="gallery-grid">
+          <figure class="gallery-card wide" data-tilt>
+            <img src="{{ '/report-assets/07-flutter-workbench.png' | relative_url }}" alt="Flutter 工作台截图">
+            <figcaption>
+              <strong>Flutter Workbench</strong>
+              <span>复杂交互、多条结构化输入、OCR 后端地址配置</span>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card" data-tilt>
+            <img src="{{ '/report-assets/01-workspace.png' | relative_url }}" alt="Jekyll 经典版工作台截图">
+            <figcaption>
+              <strong>Jekyll Classic Workspace</strong>
+              <span>原始课程作业形态，轻量、纯静态、可离线</span>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card" data-tilt>
+            <img src="{{ '/report-assets/02-blue-template.png' | relative_url }}" alt="Jekyll 蓝金模板截图">
+            <figcaption>
+              <strong>Template System</strong>
+              <span>九种模板体系被完整保留在经典版中</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="architecture" class="section reveal">
+        <div class="section-head">
+          <span class="section-index">04</span>
+          <div>
+            <h2>系统架构</h2>
+            <p>项目现在明确拆分为前台展示、经典静态版本、Flutter 主编辑器和独立 OCR 服务四层。</p>
+          </div>
+        </div>
+
+        <div class="architecture-grid">
+          <figure class="diagram-card">
+            <img src="{{ '/report-assets/04-architecture.png' | relative_url }}" alt="系统架构图">
+          </figure>
+          <div class="stack-card">
+            <div class="stack-group">
+              <span>Presentation</span>
+              <h3>Jekyll Landing</h3>
+              <p>负责项目叙事、成果展示、版本分流与部署入口。</p>
+            </div>
+            <div class="stack-group">
+              <span>Static Generator</span>
+              <h3>Legacy Jekyll</h3>
+              <p>基于 HTML / CSS / JavaScript 的纯前端简历生成器，保留课程作业原貌。</p>
+            </div>
+            <div class="stack-group">
+              <span>Rich Editor</span>
+              <h3>Flutter Web</h3>
+              <p>承接复杂表单、结构化数据、多条经历与 OCR 接口联动。</p>
+            </div>
+            <div class="stack-group">
+              <span>Backend Service</span>
+              <h3>FastAPI OCR API</h3>
+              <p>从 <code>.env</code> 读取阿里云密钥，对外暴露 <code>/api/transcript/parse</code>。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="api" class="section reveal">
+        <div class="section-head">
+          <span class="section-index">05</span>
+          <div>
+            <h2>OCR API 后端</h2>
+            <p>
+              现在仓库中新增了 <code>flutter-api/</code> 目录，直接包含可运行的 FastAPI 后端。
+              这样 Flutter 页面就不再只是“预留接口”，而是有实际可联调、可部署的服务端实现。
+            </p>
+          </div>
+        </div>
+
+        <div class="api-grid">
+          <article class="api-card">
+            <h3>核心接口</h3>
+            <pre><code>POST /api/transcript/parse
+Content-Type: multipart/form-data
+file=&lt;PDF / docx / image&gt;</code></pre>
+            <p>返回候选课程、OCR 原文和友好错误信息，供 Flutter 页面勾选导入。</p>
+          </article>
+
+          <article class="api-card">
+            <h3>后端技术</h3>
+            <ul>
+              <li>FastAPI + Uvicorn</li>
+              <li>PyMuPDF 处理 PDF</li>
+              <li>Pillow 压缩和校正图片</li>
+              <li>Aliyun OCR 统一识别接口</li>
+            </ul>
+          </article>
+
+          <article class="api-card">
+            <h3>部署原则</h3>
+            <ul>
+              <li>密钥只放后端 <code>.env</code></li>
+              <li>在线 Flutter 页面必须连接 HTTPS 后端</li>
+              <li>前端只保存 API Base URL，不保存 AccessKey</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="closing-band reveal">
+        <div>
+          <span class="eyebrow">Launch Paths</span>
+          <h2>现在你可以同时展示三个层面</h2>
+          <p>
+            介绍页负责讲清楚项目，Jekyll 经典版负责保留课程作业原型，
+            Flutter 工作台负责展示升级后的结构化编辑与 OCR 能力。
+          </p>
+        </div>
+        <div class="closing-actions">
+          <a class="button primary" href="{{ '/flutter-version/' | relative_url }}">进入 Flutter 工作台</a>
+          <a class="button" href="{{ '/legacy-jekyll/' | relative_url }}">进入 Jekyll 经典版</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="{{ '/assets/js/landing.js' | relative_url }}"></script>
 </body>
 </html>

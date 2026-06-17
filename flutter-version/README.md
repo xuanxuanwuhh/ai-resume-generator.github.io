@@ -1,10 +1,10 @@
 # Flutter Resume Workbench
 
-这是仓库中的主编辑器版本。
+这是项目中的主编辑器版本。
 
-## 当前能力
+## 功能
 
-- 左侧多板块编辑
+- 左侧支持多板块结构化编辑
 - 每个板块支持新增 / 删除条目
 - 教育经历多条录入
 - 课程成绩多条录入
@@ -16,25 +16,21 @@
 - 浏览器导出 PDF
 - 成绩单 OCR 导入
 
-## OCR 说明
+## OCR 接法
 
-这里的 OCR 不是直接在 Flutter Web 里放密钥。
+Flutter Web 本身也是前端，不能安全放阿里云密钥。
 
-Flutter Web 也是浏览器前端，密钥放进去并不安全。当前实现是：
+当前实现方式是：
 
 ```text
-Flutter Web
-  -> 你自己的后端 /api/transcript/parse
-  -> 阿里云 OCR
+Flutter Web -> FastAPI OCR Backend -> Aliyun OCR
 ```
 
-参考后端在：
+后端目录已经放进当前仓库：
 
-- `D:\BiographicalNotes\ai-resume-backend`
-
-参考密钥模板在：
-
-- `D:\BiographicalNotes\ai-resume-backend\.env.example`
+```text
+../flutter-api/
+```
 
 ## 本地运行
 
@@ -44,24 +40,29 @@ flutter pub get
 flutter run -d chrome
 ```
 
-如果需要 OCR，把页面里的 `OCR 后端地址` 设置成：
+## 本地联调 OCR
+
+先启动后端：
+
+```powershell
+Set-Location -LiteralPath ".\flutter-api"
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+然后在 Flutter 页面中填：
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## 检查命令
+## 验证
 
 ```powershell
 flutter analyze
 flutter test
 flutter build web --base-href "/ai-resume-generator.github.io/flutter-version/"
-```
-
-## 线上发布
-
-GitHub Pages 会把 Flutter Web 发布到：
-
-```text
-/ai-resume-generator.github.io/flutter-version/
 ```

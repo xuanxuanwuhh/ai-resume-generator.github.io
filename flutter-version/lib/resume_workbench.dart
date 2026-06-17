@@ -37,8 +37,11 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   late final TextEditingController _apiBaseController;
 
   bool _ocrBusy = false;
+  bool _apiChecking = false;
+  String _apiStatus =
+      '可连接本地 FastAPI 或线上 HTTPS OCR 服务。';
   String _ocrStatus =
-      '成绩单 OCR 通过后端接口调用。阿里云密钥只放在后端 .env，不放在 Jekyll 或 Flutter 前端。';
+      '上传 PDF、docx 或图片后，将通过后端 /api/transcript/parse 接口识别课程。';
   String _ocrRawText = '';
   List<CourseCandidate> _ocrCandidates = const [];
 
@@ -68,6 +71,44 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
+  }
+
+  Future<void> _checkApiHealth() async {
+    final apiBase = _normalizedApiBase();
+    if (apiBase == null) {
+      setState(() {
+        _apiStatus = '请先填写 API 地址。';
+      });
+      return;
+    }
+
+    setState(() {
+      _apiChecking = true;
+      _apiStatus = '正在检查 API 连通性...';
+    });
+
+    try {
+      final response = await http.get(Uri.parse(apiBase));
+      final body = response.body;
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        setState(() {
+          _apiChecking = false;
+          _apiStatus = body.contains('AI Resume Generator API')
+              ? 'API 已连通，OCR 接口可继续联调。'
+              : 'API 已响应，但请确认这是 OCR 后端服务。';
+        });
+        return;
+      }
+      setState(() {
+        _apiChecking = false;
+        _apiStatus = 'API 响应异常：${response.statusCode}';
+      });
+    } catch (error) {
+      setState(() {
+        _apiChecking = false;
+        _apiStatus = 'API 检查失败：${error.toString().replaceFirst('Exception: ', '')}';
+      });
+    }
   }
 
   void _exportPdf() {
@@ -378,8 +419,6 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             children: [
-              _buildIntroCard(),
-              const SizedBox(height: 16),
               _buildPersonalSection(),
               const SizedBox(height: 16),
               _buildEducationSection(),
@@ -396,44 +435,6 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildIntroCard() {
-    return _surfaceCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '改造说明',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            '1. 左侧所有板块都支持新增和删除条目。\n'
-            '2. 右侧只保留简历预览，不再显示本地建议和评分。\n'
-            '3. 成绩单 OCR 统一走后端接口，前端不保存阿里云密钥。',
-            style: TextStyle(height: 1.6, color: Color(0xFF516072)),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF4FF),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              _needsHttpsBackend
-                  ? '当前是 GitHub Pages 在线页面。OCR 后端必须提供 HTTPS 地址，并配置 CORS；本地 http://127.0.0.1:8000 不能直接被线上 https 页面调用。参考密钥配置：D:\\BiographicalNotes\\ai-resume-backend\\.env.example'
-                  : '本地调试可直接连接 D:\\BiographicalNotes\\ai-resume-backend，对应密钥配置参考 .env.example。',
-              style: const TextStyle(
-                color: Color(0xFF214C9A),
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -538,12 +539,63 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildCourseSection() {
     return _sectionCard(
       title: '成绩亮点 / OCR 导入',
-      subtitle: '支持手动录入，也支持调用参考项目的成绩单 OCR 接口',
+      subtitle: '支持手动录入，也支持调用后端 OCR 接口导入成绩单课程',
       actionLabel: '新增课程',
       onAction: _addCourse,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F8FC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFD6DEEA)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'API 配置',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _needsHttpsBackend
+                      ? '当前在线页面需要 HTTPS OCR 后端；本地 http://127.0.0.1:8000 无法直接被 https 页面调用。'
+                      : '本地调试可直接连接参考后端 D:\\BiographicalNotes\\ai-resume-backend。',
+                  style: const TextStyle(
+                    color: Color(0xFF516072),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  _apiStatus,
+                  style: const TextStyle(
+                    color: Color(0xFF214C9A),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _apiChecking ? null : _checkApiHealth,
+                      icon: const Icon(Icons.wifi_tethering_outlined),
+                      label: Text(_apiChecking ? '检查中...' : '检查 API'),
+                    ),
+                    const _MiniHint(label: '根路径', value: 'GET /'),
+                    const _MiniHint(label: 'OCR 接口', value: 'POST /api/transcript/parse'),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: TextField(
@@ -1699,5 +1751,42 @@ class IdFactory {
   static String next() {
     _counter += 1;
     return 'item-${DateTime.now().microsecondsSinceEpoch}-$_counter';
+  }
+}
+
+class _MiniHint extends StatelessWidget {
+  const _MiniHint({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFD6DEEA)),
+      ),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF556274),
+          ),
+          children: [
+            TextSpan(
+              text: '$label ',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -16,6 +16,5 @@ exclude:
   - check-jekyll.ps1
   - api
   - .jekyll-cache
-  - report-assets
   - 复现命令.txt
   - 创新实验-实验五-期末大作业-Jekyll静态网站版-完成版.docx
