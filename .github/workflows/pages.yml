@@ -18,6 +18,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -32,7 +36,19 @@ jobs:
           else
             baseurl="/$repo_name"
           fi
+          echo "PAGES_BASEURL=$baseurl" >> "$GITHUB_ENV"
           JEKYLL_ENV=production bundle exec jekyll build --baseurl "$baseurl"
+      - name: Build Flutter web
+        shell: bash
+        run: |
+          cd flutter-version
+          flutter pub get
+          flutter build web --release --base-href "${PAGES_BASEURL}/flutter-version/"
+      - name: Merge Flutter web into Pages artifact
+        shell: bash
+        run: |
+          mkdir -p "_site/flutter-version"
+          cp -R flutter-version/build/web/. "_site/flutter-version/"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

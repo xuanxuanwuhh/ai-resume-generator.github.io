@@ -1,11 +1,11 @@
 {
-    "name": "ai_resume_generator_flutter",
-    "short_name": "ai_resume_generator_flutter",
+    "name": "Flutter Resume Generator",
+    "short_name": "ResumeGen",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Flutter web version of the resume generator workspace.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

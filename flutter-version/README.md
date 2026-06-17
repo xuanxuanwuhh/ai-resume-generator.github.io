@@ -1,17 +1,36 @@
-# ai_resume_generator_flutter
+# Flutter Resume Generator
 
-A new Flutter project.
+Flutter 版本的简历生成与优化工作台，目录位于仓库 `flutter-version/`。
 
-## Getting Started
+## 功能
 
-This project is a starting point for a Flutter application.
+- 入口页与场景选择
+- 简历信息编辑
+- 实时预览
+- 模板 / 主题 / 语言切换
+- 本地规则评分
+- 本地目标匹配
+- 本地优化建议
+- Web 打印入口
 
-A few resources to get you started if this is your first Flutter project:
+## 本地开发
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```powershell
+Set-Location -LiteralPath ".\flutter-version"
+D:\dev\flutter\bin\flutter.bat pub get
+D:\dev\flutter\bin\flutter.bat run -d chrome
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 质量检查
+
+```powershell
+Set-Location -LiteralPath ".\flutter-version"
+D:\dev\flutter\bin\flutter.bat analyze
+D:\dev\flutter\bin\flutter.bat test
+```
+
+## 发布
+
+GitHub Actions 会在主仓库 Pages 流程中自动构建并发布 Flutter Web 版本到：
+
+`/ai-resume-generator.github.io/flutter-version/`

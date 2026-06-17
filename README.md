@@ -125,10 +125,51 @@ docker compose down         # 停止服务
 | 📚 | 考研时间线 | http://127.0.0.1:4000/?case=postgraduate&template=timeline&theme=forest |
 
 
+🦋 Flutter 子项目
+----------------
+
+仓库中已新增 Flutter 版本，目录为 `flutter-version/`，用于在 Flutter Web 中复刻简历工作台的核心体验。
+
+**当前能力：**
+
+- 入口页与场景选择
+- 简历编辑表单
+- 实时预览
+- 模板 / 主题 / 语言切换
+- 本地规则评分
+- 本地关键词匹配
+- 本地优化建议
+- Web 端打印入口
+
+**本地运行：**
+
+```powershell
+Set-Location -LiteralPath ".\flutter-version"
+D:\dev\flutter\bin\flutter.bat pub get
+D:\dev\flutter\bin\flutter.bat run -d chrome
+```
+
+**质量检查：**
+
+```powershell
+Set-Location -LiteralPath ".\flutter-version"
+D:\dev\flutter\bin\flutter.bat analyze
+D:\dev\flutter\bin\flutter.bat test
+```
+
+**在线地址：**
+
+- Jekyll 首页：`https://xuanxuanwuhh.github.io/ai-resume-generator.github.io/`
+- Flutter Web：`https://xuanxuanwuhh.github.io/ai-resume-generator.github.io/flutter-version/`
+
+
 🔗 GitHub Pages 在线预览
 -------------------------
 
-仓库已配置 GitHub Actions 自动部署。
+仓库已配置 GitHub Actions 自动部署，当前会同时发布：
+
+- 根目录 Jekyll 站点
+- `flutter-version/` 下的 Flutter Web 构建产物
 
 **开启步骤：**
 
@@ -157,6 +198,7 @@ ai-resume-generator.github.io/
 ├── assets/               # 静态资源
 │   ├── css/style.css     # 样式文件
 │   └── js/app.js         # 交互脚本
+├── flutter-version/      # Flutter Web 版本
 ├── report-assets/        # 报告截图素材
 ├── _config.yml           # Jekyll 配置
 ├── index.html            # 主页面
