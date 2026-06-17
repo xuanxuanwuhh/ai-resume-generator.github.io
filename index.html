@@ -1,6 +1,6 @@
 ---
 layout: null
-title: 简历生成与优化工作台
+title: AI 简历工作台升级入口
 ---
 <!doctype html>
 <html lang="zh-CN">
@@ -8,261 +8,266 @@ title: 简历生成与优化工作台
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page.title }}</title>
-  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --text: #182230;
+      --muted: #5f6b7a;
+      --line: #dbe3ef;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --soft: #eef4ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 32%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 24%),
+        var(--bg);
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+    }
+
+    .hero-copy {
+      padding: 36px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      min-height: 32px;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 18px 0 14px;
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1.08;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--text);
+      background: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .button.primary {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #ffffff;
+    }
+
+    .hero-side {
+      padding: 26px;
+    }
+
+    .hero-side h2,
+    .section h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    .hero-side p,
+    .section p,
+    .section li {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-side ul,
+    .section ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .section {
+      padding: 22px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #f5f8fd;
+      border: 1px solid var(--line);
+      color: #3b4b60;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .notice {
+      margin-top: 22px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      line-height: 1.65;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #f2f5fa;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+    }
+
+    @media (max-width: 960px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy,
+      .hero-side,
+      .section {
+        padding: 22px;
+      }
+    }
+  </style>
 </head>
-<body data-theme="aurora" data-lang="zh">
-  <section id="entryScreen" class="entry-screen" aria-label="入口选择">
-    <div class="entry-grid">
-      <div class="entry-copy">
-        <span class="entry-kicker">Jekyll Static Studio</span>
-        <h1>简历生成与优化工作台</h1>
-        <p>先选择材料场景、视觉模板、主题色和界面语言，再进入简历生成界面。静态站默认使用本地规则建议，不伪装成真实大模型。</p>
-      </div>
-
-      <div class="entry-panel">
-        <div class="entry-section">
-          <h2>材料场景</h2>
-          <div class="entry-options" role="group" aria-label="入口材料场景">
-            <button class="entry-choice active" type="button" data-entry-case="job">求职</button>
-            <button class="entry-choice" type="button" data-entry-case="postgraduate">考研</button>
-            <button class="entry-choice" type="button" data-entry-case="recommendation">保研</button>
-            <button class="entry-choice" type="button" data-entry-case="admission">升学</button>
-          </div>
+<body>
+  <main>
+    <section class="hero">
+      <article class="panel hero-copy">
+        <span class="eyebrow">Jekyll 首页已改为升级入口</span>
+        <h1>简历编辑器已升级到 Flutter Web</h1>
+        <p class="lead">
+          旧的 Jekyll 工作台已经下线，原因是样式和交互继续堆在静态页里会越来越不稳，
+          尤其是“导出按钮显示异常”和“成绩单 OCR 需要后端密钥”这两类问题。现在根目录只保留一个稳定入口，
+          实际编辑、增删条目、成绩单识别都在 Flutter Web 版中完成。
+        </p>
+        <div class="actions">
+          <a class="button primary" href="{{ '/flutter-version/' | relative_url }}">打开 Flutter 工作台</a>
+          <a class="button" href="https://github.com/xuanxuanwuhh/ai-resume-generator.github.io">查看仓库</a>
         </div>
-
-        <div class="entry-section">
-          <h2>模板与主题</h2>
-          <label>
-            简历模板
-            <select id="entryTemplate">
-              <option value="modern">现代通用</option>
-              <option value="blue">蓝金正式</option>
-              <option value="sidebar">侧栏信息</option>
-              <option value="gray">蓝灰团队</option>
-              <option value="classic">经典单栏</option>
-              <option value="minimal">极简投递</option>
-              <option value="timeline">时间线项目</option>
-              <option value="professional">专业沉稳</option>
-              <option value="compact">紧凑信息</option>
-            </select>
-          </label>
-          <div class="theme-options" role="group" aria-label="主题颜色">
-            <button class="theme-dot active" type="button" data-theme-choice="aurora" title="极光蓝">蓝</button>
-            <button class="theme-dot" type="button" data-theme-choice="forest" title="森林绿">绿</button>
-            <button class="theme-dot" type="button" data-theme-choice="ember" title="琥珀橙">橙</button>
-            <button class="theme-dot" type="button" data-theme-choice="violet" title="学院紫">紫</button>
-          </div>
+        <div class="chip-row">
+          <span class="chip">多条教育经历</span>
+          <span class="chip">多条项目经历</span>
+          <span class="chip">成绩单 OCR 导入</span>
+          <span class="chip">右侧仅保留简历预览</span>
         </div>
+      </article>
 
-        <div class="entry-section">
-          <h2>语言</h2>
-          <div class="entry-options two" role="group" aria-label="界面语言">
-            <button class="lang-choice active" type="button" data-lang-choice="zh">中文</button>
-            <button class="lang-choice" type="button" data-lang-choice="en">English</button>
-          </div>
-        </div>
-
-        <button id="startBtn" class="start-btn" type="button">进入工作台</button>
-      </div>
-    </div>
-  </section>
-
-  <main id="appShell" class="app-shell is-hidden">
-    <aside class="control-pane" aria-label="简历编辑区">
-      <header class="brand">
-        <span class="brand-mark">CV</span>
-        <div>
-          <h1>简历生成与优化工作台</h1>
-          <p>Jekyll 静态网站 · 本地规则建议</p>
-        </div>
-      </header>
-
-      <div class="privacy-note">
-        <strong>演示数据</strong>
-        <span>页面示例不使用真实个人信息，所有评分与匹配均在浏览器本地完成。</span>
-      </div>
-
-      <section class="panel compact">
-        <div class="panel-title">
-          <span>01</span>
-          <h2>选择材料场景</h2>
-        </div>
-        <div class="case-grid" role="group" aria-label="材料场景">
-          <button class="case-btn active" type="button" data-case="job">求职</button>
-          <button class="case-btn" type="button" data-case="postgraduate">考研</button>
-          <button class="case-btn" type="button" data-case="recommendation">保研</button>
-          <button class="case-btn" type="button" data-case="admission">升学</button>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-title">
-          <span>02</span>
-          <h2>填写核心信息</h2>
-        </div>
-        <form id="resumeForm" class="form-grid">
-          <label>
-            姓名
-            <input name="name" value="示例学生" autocomplete="name">
-          </label>
-          <label>
-            定位
-            <input name="title" value="计算机方向申请者 / Web 项目实践者">
-          </label>
-          <label>
-            邮箱
-            <input name="email" value="demo@example.com" autocomplete="email">
-          </label>
-          <label>
-            电话
-            <input name="phone" value="000-0000-0000" autocomplete="tel">
-          </label>
-          <label>
-            学校
-            <input name="school" value="示例大学">
-          </label>
-          <label>
-            专业
-            <input name="major" value="计算机类专业">
-          </label>
-          <label class="wide">
-            个人简介
-            <textarea name="summary" rows="4">具备 Web 前端、静态网站构建和项目文档整理基础，能够完成从需求分析、界面设计、交互实现到运行验证的完整实践流程。关注材料结构化表达、用户体验、隐私保护和可复现交付。</textarea>
-          </label>
-          <label class="wide">
-            项目经历
-            <textarea name="project" rows="5">Jekyll 简历生成与优化工作台：基于静态网站技术重新实现简历生成器，完成场景选择、信息编辑、实时预览、模板切换、本地材料评分和目标匹配等模块，实现无需后端即可运行和部署的课程项目版本。</textarea>
-          </label>
-          <label class="wide">
-            技能关键词
-            <input name="skills" value="HTML, CSS, JavaScript, Jekyll, Git, 信息架构, 交互设计, 文档写作">
-          </label>
-          <label class="wide">
-            奖项证书
-            <input name="awards" value="创新实验课程项目实践、Web开发综合训练">
-          </label>
-        </form>
-      </section>
-    </aside>
-
-    <section class="preview-pane" aria-label="简历预览区">
-      <header class="topbar">
-        <div>
-          <span class="eyebrow">实时预览</span>
-          <strong id="caseTitle">岗位投递版</strong>
-        </div>
-        <div class="toolbar">
-          <label>
-            模板
-            <select id="templateSelect">
-              <option value="modern">现代通用</option>
-              <option value="blue">蓝金正式</option>
-              <option value="sidebar">侧栏信息</option>
-              <option value="gray">蓝灰团队</option>
-              <option value="classic">经典单栏</option>
-              <option value="minimal">极简投递</option>
-              <option value="timeline">时间线项目</option>
-              <option value="professional">专业沉稳</option>
-              <option value="compact">紧凑信息</option>
-            </select>
-          </label>
-          <label>
-            主题
-            <select id="themeSelect">
-              <option value="aurora">极光蓝</option>
-              <option value="forest">森林绿</option>
-              <option value="ember">琥珀橙</option>
-              <option value="violet">学院紫</option>
-            </select>
-          </label>
-          <label>
-            语言
-            <select id="languageSelect">
-              <option value="zh">中文</option>
-              <option value="en">English</option>
-            </select>
-          </label>
-          <button id="printBtn" type="button">导出 PDF</button>
-        </div>
-      </header>
-
-      <div class="paper-stage">
-        <article id="resumePaper" class="resume-paper template-modern">
-          <header class="resume-head">
-            <div>
-              <h2 data-bind="name">示例学生</h2>
-              <p data-bind="title">计算机方向申请者 / Web 项目实践者</p>
-            </div>
-            <ul>
-              <li data-bind="email">demo@example.com</li>
-              <li data-bind="phone">000-0000-0000</li>
-            </ul>
-          </header>
-
-          <section>
-            <h3>个人简介</h3>
-            <p data-bind="summary"></p>
-          </section>
-          <section>
-            <h3>教育背景</h3>
-            <p><strong data-bind="school"></strong> · <span data-bind="major"></span></p>
-            <p id="educationHint">重点呈现岗位相关课程、项目实践和可验证技能。</p>
-          </section>
-          <section>
-            <h3>项目经历</h3>
-            <p data-bind="project"></p>
-          </section>
-          <section class="tag-section">
-            <h3>技能关键词</h3>
-            <div id="skillTags" class="tag-list"></div>
-          </section>
-          <section>
-            <h3>奖项证书</h3>
-            <p data-bind="awards"></p>
-          </section>
-        </article>
-      </div>
+      <aside class="panel hero-side">
+        <h2>为什么不把密钥放到 Flutter 里</h2>
+        <p>
+          Flutter Web 最终仍然运行在浏览器里，本质上和 Jekyll 一样都是前端静态资源。
+          只要把 OCR 密钥写进页面，用户就能在网络请求或打包文件里拿到它。
+        </p>
+        <ul>
+          <li>正确做法：前端调用你自己的后端接口，后端读取 <code>.env</code> 里的阿里云密钥。</li>
+          <li>参考密钥文件：<code>D:\BiographicalNotes\ai-resume-backend\.env.example</code></li>
+          <li>在线 GitHub Pages 页面如果要调 OCR，后端还必须提供 HTTPS 和 CORS。</li>
+        </ul>
+      </aside>
     </section>
 
-    <aside class="assistant-pane" aria-label="本地规则建议区">
-      <section class="panel score-panel">
-        <div class="panel-title">
-          <span>03</span>
-          <h2>本地规则评分</h2>
-        </div>
-        <p class="local-note">所有评分与匹配均在浏览器本地完成。</p>
-        <div class="score-ring">
-          <strong id="scoreValue">0</strong>
-          <small>/100</small>
-        </div>
-        <p id="scoreLevel">待评估</p>
-        <ul id="scoreTips" class="tips"></ul>
-      </section>
+    <section class="grid">
+      <article class="panel section">
+        <h2>Flutter 版现在做了什么</h2>
+        <ul>
+          <li>左侧所有板块支持新增和删除。</li>
+          <li>支持教育、课程、经历、项目、技能、奖项多条录入。</li>
+          <li>支持上传成绩单并调用后端 OCR 接口，识别后勾选加入课程。</li>
+          <li>右侧移除本地建议区，只保留简历预览与导出。</li>
+        </ul>
+      </article>
 
-      <section class="panel">
-        <div class="panel-title">
-          <span>04</span>
-          <h2>本地目标匹配</h2>
-        </div>
-        <label class="target-box">
-          粘贴岗位 JD / 院校要求
-          <textarea id="targetInput" rows="6">前端开发实习生，要求熟悉 HTML、CSS、JavaScript，了解 Vue 或静态网站开发，有项目实践、文档能力和良好的沟通协作能力。</textarea>
-        </label>
-        <button id="matchBtn" class="primary-action" type="button">运行本地匹配</button>
-        <div id="matchResult" class="result-box"></div>
-      </section>
+      <article class="panel section">
+        <h2>本地联调方式</h2>
+        <p>本地可以直接用参考项目后端：</p>
+        <ul>
+          <li>后端目录：<code>D:\BiographicalNotes\ai-resume-backend</code></li>
+          <li>OCR 地址默认：<code>http://127.0.0.1:8000</code></li>
+          <li>Flutter 页面中可以直接改 OCR 后端地址。</li>
+        </ul>
+      </article>
 
-      <section class="panel">
-        <div class="panel-title">
-          <span>05</span>
-          <h2>本地优化建议</h2>
+      <article class="panel section">
+        <h2>线上限制</h2>
+        <p>
+          GitHub Pages 上的 Flutter 页面是 <code>https</code>，因此不能直接去调本地
+          <code>http://127.0.0.1:8000</code>。如果要线上也能 OCR，需要单独部署一个 HTTPS 后端。
+        </p>
+        <div class="notice">
+          这也是这次把静态页升级成 Flutter 工作台、同时把 OCR 设计成“前端只配地址，不存密钥”的核心原因。
         </div>
-        <button id="optimizeBtn" class="primary-action secondary" type="button">生成优化建议</button>
-        <div id="optimizeResult" class="result-box"></div>
-      </section>
-    </aside>
+      </article>
+    </section>
   </main>
-
-  <script src="{{ '/assets/js/app.js' | relative_url }}"></script>
 </body>
 </html>

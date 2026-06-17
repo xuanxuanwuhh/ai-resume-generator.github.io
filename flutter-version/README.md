@@ -1,36 +1,67 @@
-# Flutter Resume Generator
+# Flutter Resume Workbench
 
-Flutter 版本的简历生成与优化工作台，目录位于仓库 `flutter-version/`。
+这是仓库中的主编辑器版本。
 
-## 功能
+## 当前能力
 
-- 入口页与场景选择
-- 简历信息编辑
-- 实时预览
-- 模板 / 主题 / 语言切换
-- 本地规则评分
-- 本地目标匹配
-- 本地优化建议
-- Web 打印入口
+- 左侧多板块编辑
+- 每个板块支持新增 / 删除条目
+- 教育经历多条录入
+- 课程成绩多条录入
+- 实习 / 校园经历多条录入
+- 项目经历多条录入
+- 技能多条录入
+- 奖项 / 证书多条录入
+- 右侧实时简历预览
+- 浏览器导出 PDF
+- 成绩单 OCR 导入
 
-## 本地开发
+## OCR 说明
+
+这里的 OCR 不是直接在 Flutter Web 里放密钥。
+
+Flutter Web 也是浏览器前端，密钥放进去并不安全。当前实现是：
+
+```text
+Flutter Web
+  -> 你自己的后端 /api/transcript/parse
+  -> 阿里云 OCR
+```
+
+参考后端在：
+
+- `D:\BiographicalNotes\ai-resume-backend`
+
+参考密钥模板在：
+
+- `D:\BiographicalNotes\ai-resume-backend\.env.example`
+
+## 本地运行
 
 ```powershell
 Set-Location -LiteralPath ".\flutter-version"
-D:\dev\flutter\bin\flutter.bat pub get
-D:\dev\flutter\bin\flutter.bat run -d chrome
+flutter pub get
+flutter run -d chrome
 ```
 
-## 质量检查
+如果需要 OCR，把页面里的 `OCR 后端地址` 设置成：
+
+```text
+http://127.0.0.1:8000
+```
+
+## 检查命令
 
 ```powershell
-Set-Location -LiteralPath ".\flutter-version"
-D:\dev\flutter\bin\flutter.bat analyze
-D:\dev\flutter\bin\flutter.bat test
+flutter analyze
+flutter test
+flutter build web --base-href "/ai-resume-generator.github.io/flutter-version/"
 ```
 
-## 发布
+## 线上发布
 
-GitHub Actions 会在主仓库 Pages 流程中自动构建并发布 Flutter Web 版本到：
+GitHub Pages 会把 Flutter Web 发布到：
 
-`/ai-resume-generator.github.io/flutter-version/`
+```text
+/ai-resume-generator.github.io/flutter-version/
+```
