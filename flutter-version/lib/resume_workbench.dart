@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'printing/print_helper.dart' as print_helper;
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class ResumeWorkbenchApp extends StatelessWidget {
   const ResumeWorkbenchApp({super.key});
@@ -8,7 +13,7 @@ class ResumeWorkbenchApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Resume Workbench',
+      title: 'AI Resume Workbench',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -29,20 +34,191 @@ class ResumeWorkbenchPage extends StatefulWidget {
 
 class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   final ResumeData _resume = ResumeData.sample();
+  final ImagePicker _imagePicker = ImagePicker();
   ResumeTemplate _template = ResumeTemplate.modern;
+  int _mobileTabIndex = 0;
+  bool _isExportingPdf = false;
+  bool _isLocating = false;
+
+  Future<void> _exportPdf() async {
+    if (_isExportingPdf) return;
+
+    setState(() {
+      _isExportingPdf = true;
+    });
+
+    try {
+      final bytes = await _buildPdfDocument();
+      await Printing.layoutPdf(onLayout: (_) async => bytes);
+      if (!mounted) return;
+      _showMessage('已打开 PDF 导出 / 打印面板。');
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage('导出 PDF 失败：$error');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExportingPdf = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _sharePdf() async {
+    try {
+      final bytes = await _buildPdfDocument();
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: '${_resume.personal.name.trim().isEmpty ? 'resume' : _resume.personal.name.trim()}-resume.pdf',
+      );
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage('分享 PDF 失败：$error');
+    }
+  }
+
+  Future<void> _fillCurrentLocation() async {
+    if (_isLocating) return;
+
+    setState(() {
+      _isLocating = true;
+    });
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showMessage('请先打开系统定位服务。');
+        return;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        _showMessage('未获得定位权限，已保留手动填写地址方式。');
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+      );
+
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      final mark = placemarks.isNotEmpty ? placemarks.first : null;
+      final administrativeArea = mark?.administrativeArea?.trim();
+      final locality = mark?.locality?.trim();
+      final subLocality = mark?.subLocality?.trim();
+      final pieces = <String>[];
+      if (administrativeArea != null && administrativeArea.isNotEmpty) {
+        pieces.add(administrativeArea);
+      }
+      if (locality != null && locality.isNotEmpty && locality != administrativeArea) {
+        pieces.add(locality);
+      }
+      if (subLocality != null && subLocality.isNotEmpty) {
+        pieces.add(subLocality);
+      }
+
+      final text = pieces.isEmpty ? '当前位置' : pieces.join(' ');
+
+      setState(() {
+        _resume.personal.location = text;
+      });
+
+      _showMessage('已填入当前位置：$text');
+    } catch (error) {
+      _showMessage('获取当前位置失败，请手动填写地址。');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLocating = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _pickAvatar(ImageSource source) async {
+    try {
+      final file = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 88,
+        maxWidth: 1600,
+      );
+
+      if (file == null) return;
+
+      final bytes = await file.readAsBytes();
+      setState(() {
+        _resume.personal.avatarBytes = bytes;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage('头像读取失败：$error');
+    }
+  }
+
+  void _removeAvatar() {
+    setState(() {
+      _resume.personal.avatarBytes = null;
+    });
+  }
+
+  void _showAvatarOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.camera_alt_outlined),
+                  title: const Text('拍照上传'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _pickAvatar(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: const Text('从相册选择'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _pickAvatar(ImageSource.gallery);
+                  },
+                ),
+                if (_resume.personal.avatarBytes != null)
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline),
+                    title: const Text('移除头像'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _removeAvatar();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   void _showMessage(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
-  }
-
-  void _exportPdf() {
-    final didTrigger = print_helper.triggerPrint();
-    if (!didTrigger) {
-      _showMessage('当前平台不支持浏览器打印。');
-    }
   }
 
   void _addEducation() {
@@ -87,6 +263,284 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     });
   }
 
+  Future<Uint8List> _buildPdfDocument() async {
+    final pdf = pw.Document();
+    final baseFont = await PdfGoogleFonts.notoSansRegular();
+    final boldFont = await PdfGoogleFonts.notoSansBold();
+
+    pw.TextStyle sectionStyle() => pw.TextStyle(
+          font: boldFont,
+          fontSize: 14,
+          color: PdfColor.fromInt(_template.theme.sectionColor.toARGB32()),
+        );
+
+    pw.TextStyle bodyStyle() => pw.TextStyle(
+          font: baseFont,
+          fontSize: 10.5,
+          lineSpacing: 4,
+          color: PdfColor.fromInt(_template.theme.bodyColor.toARGB32()),
+        );
+
+    pw.Widget sectionTitle(String title) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 14, bottom: 8),
+        child: pw.Text(title, style: sectionStyle()),
+      );
+    }
+
+    pw.Widget timelineCard({
+      required String title,
+      required String meta,
+      required String body,
+    }) {
+      return pw.Container(
+        width: double.infinity,
+        margin: const pw.EdgeInsets.only(bottom: 8),
+        padding: const pw.EdgeInsets.all(10),
+        decoration: pw.BoxDecoration(
+          color: PdfColor.fromInt(_template.theme.surfaceColor.toARGB32()),
+          border: pw.Border.all(
+            color: PdfColor.fromInt(_template.theme.borderColor.toARGB32()),
+          ),
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              title,
+              style: pw.TextStyle(font: boldFont, fontSize: 11.5),
+            ),
+            if (meta.trim().isNotEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(top: 3),
+                child: pw.Text(
+                  meta,
+                  style: pw.TextStyle(
+                    font: baseFont,
+                    fontSize: 9.2,
+                    color: PdfColors.grey700,
+                  ),
+                ),
+              ),
+            if (body.trim().isNotEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(top: 6),
+                child: pw.Text(body, style: bodyStyle()),
+              ),
+          ],
+        ),
+      );
+    }
+
+    final avatarProvider = _resume.personal.avatarBytes == null
+        ? null
+        : pw.MemoryImage(_resume.personal.avatarBytes!);
+
+    final contactItems = [
+      _resume.personal.email,
+      _resume.personal.phone,
+      _resume.personal.location,
+    ].where((value) => value.trim().isNotEmpty).toList();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.fromLTRB(34, 30, 34, 32),
+        build: (context) {
+          return [
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                if (avatarProvider != null)
+                  pw.Container(
+                    width: 72,
+                    height: 72,
+                    margin: const pw.EdgeInsets.only(right: 16),
+                    decoration: pw.BoxDecoration(
+                      borderRadius: pw.BorderRadius.circular(16),
+                      image: pw.DecorationImage(
+                        image: avatarProvider,
+                        fit: pw.BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        _resume.personal.name.trim().isEmpty ? '你的姓名' : _resume.personal.name,
+                        style: pw.TextStyle(font: boldFont, fontSize: 24),
+                      ),
+                      pw.SizedBox(height: 5),
+                      pw.Text(
+                        _resume.personal.title.trim().isEmpty
+                            ? '你的定位标题'
+                            : _resume.personal.title,
+                        style: pw.TextStyle(
+                          font: baseFont,
+                          fontSize: 12,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (contactItems.isNotEmpty)
+                  pw.Container(
+                    width: 160,
+                    alignment: pw.Alignment.topRight,
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        for (final item in contactItems)
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 4),
+                            child: pw.Text(
+                              item,
+                              textAlign: pw.TextAlign.right,
+                              style: pw.TextStyle(
+                                font: baseFont,
+                                fontSize: 9.5,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            pw.SizedBox(height: 16),
+            pw.Container(
+              height: 3,
+              decoration: pw.BoxDecoration(
+                color: PdfColor.fromInt(_template.theme.accentColor.toARGB32()),
+                borderRadius: pw.BorderRadius.circular(999),
+              ),
+            ),
+            sectionTitle('个人简介'),
+            pw.Text(
+              _resume.personal.summary.trim().isEmpty ? '请补充个人简介。' : _resume.personal.summary,
+              style: bodyStyle(),
+            ),
+            sectionTitle('教育经历'),
+            if (_resume.educations.isEmpty)
+              pw.Text('暂无教育经历。', style: bodyStyle())
+            else
+              ..._resume.educations.map(
+                (item) => timelineCard(
+                  title: item.school.isEmpty ? '未填写学校' : item.school,
+                  meta: [
+                    item.degree,
+                    item.major,
+                    item.period,
+                  ].where((value) => value.trim().isNotEmpty).join(' · '),
+                  body: item.summary,
+                ),
+              ),
+            sectionTitle('课程 / 成绩亮点'),
+            if (_resume.courses.isEmpty)
+              pw.Text('暂无课程成绩亮点。', style: bodyStyle())
+            else
+              pw.Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final item in _resume.courses)
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColor.fromInt(_template.theme.chipColor.toARGB32()),
+                        borderRadius: pw.BorderRadius.circular(16),
+                      ),
+                      child: pw.Text(
+                        [
+                          item.name,
+                          if (item.score.trim().isNotEmpty) '成绩 ${item.score}',
+                          if (item.credit.trim().isNotEmpty) '学分 ${item.credit}',
+                          if (item.note.trim().isNotEmpty) item.note,
+                        ].where((value) => value.trim().isNotEmpty).join(' · '),
+                        style: pw.TextStyle(font: baseFont, fontSize: 9.3),
+                      ),
+                    ),
+                ],
+              ),
+            sectionTitle('实习 / 校园经历'),
+            if (_resume.experiences.isEmpty)
+              pw.Text('暂无经历。', style: bodyStyle())
+            else
+              ..._resume.experiences.map(
+                (item) => timelineCard(
+                  title: item.organization.isEmpty ? '未填写组织' : item.organization,
+                  meta: [item.role, item.period]
+                      .where((value) => value.trim().isNotEmpty)
+                      .join(' · '),
+                  body: item.description,
+                ),
+              ),
+            sectionTitle('项目经历'),
+            if (_resume.projects.isEmpty)
+              pw.Text('暂无项目经历。', style: bodyStyle())
+            else
+              ..._resume.projects.map(
+                (item) => timelineCard(
+                  title: item.name.isEmpty ? '未填写项目名称' : item.name,
+                  meta: [item.role, item.period, item.stack]
+                      .where((value) => value.trim().isNotEmpty)
+                      .join(' · '),
+                  body: item.description,
+                ),
+              ),
+            sectionTitle('技能清单'),
+            if (_resume.skills.isEmpty)
+              pw.Text('暂无技能。', style: bodyStyle())
+            else
+              pw.Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final item in _resume.skills)
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColor.fromInt(_template.theme.surfaceColor.toARGB32()),
+                        border: pw.Border.all(
+                          color: PdfColor.fromInt(_template.theme.borderColor.toARGB32()),
+                        ),
+                        borderRadius: pw.BorderRadius.circular(16),
+                      ),
+                      child: pw.Text(
+                        [item.name, item.level, item.note]
+                            .where((value) => value.trim().isNotEmpty)
+                            .join(' · '),
+                        style: pw.TextStyle(font: baseFont, fontSize: 9.3),
+                      ),
+                    ),
+                ],
+              ),
+            sectionTitle('奖项 / 证书'),
+            if (_resume.awards.isEmpty)
+              pw.Text('暂无奖项与证书。', style: bodyStyle())
+            else
+              ..._resume.awards.map(
+                (item) => timelineCard(
+                  title: item.name.isEmpty ? '未填写名称' : item.name,
+                  meta: [item.issuer, item.date]
+                      .where((value) => value.trim().isNotEmpty)
+                      .join(' · '),
+                  body: item.description,
+                ),
+              ),
+          ];
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,7 +548,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
-        titleSpacing: 20,
+        titleSpacing: 18,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
@@ -104,38 +558,65 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             ),
             SizedBox(height: 2),
             Text(
-              'Flutter Web 版：多条经历编辑与实时简历预览',
+              '移动端优先的结构化编辑与实时简历预览',
               style: TextStyle(fontSize: 13, color: Color(0xFF5B6472)),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.only(right: 10),
             child: _buildTemplatePicker(),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: FilledButton.icon(
-              onPressed: _exportPdf,
-              icon: const Icon(Icons.download_outlined),
-              label: const Text('导出 PDF'),
-            ),
+          PopupMenuButton<String>(
+            tooltip: '导出选项',
+            onSelected: (value) {
+              if (value == 'pdf') _exportPdf();
+              if (value == 'share') _sharePdf();
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'pdf', child: Text('导出 / 打印 PDF')),
+              PopupMenuItem(value: 'share', child: Text('分享 PDF')),
+            ],
+            icon: const Icon(Icons.more_horiz_rounded),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final stacked = constraints.maxWidth < 1180;
-          final editor = _buildEditorPane();
-          final preview = _buildPreviewPane();
+          final isMobile = constraints.maxWidth < 980;
+          final editor = _buildEditorPane(isMobile: isMobile);
+          final preview = _buildPreviewPane(isMobile: isMobile);
 
-          if (stacked) {
+          if (isMobile) {
+            final pages = [editor, preview];
             return Column(
               children: [
-                Expanded(child: editor),
-                const Divider(height: 1),
-                Expanded(child: preview),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                  child: SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment<int>(
+                        value: 0,
+                        icon: Icon(Icons.edit_outlined),
+                        label: Text('编辑'),
+                      ),
+                      ButtonSegment<int>(
+                        value: 1,
+                        icon: Icon(Icons.article_outlined),
+                        label: Text('预览'),
+                      ),
+                    ],
+                    selected: {_mobileTabIndex},
+                    onSelectionChanged: (selection) {
+                      setState(() {
+                        _mobileTabIndex = selection.first;
+                      });
+                    },
+                  ),
+                ),
+                Expanded(child: pages[_mobileTabIndex]),
               ],
             );
           }
@@ -149,18 +630,33 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
           );
         },
       ),
+      floatingActionButton: MediaQuery.of(context).size.width < 980
+          ? FloatingActionButton.extended(
+              onPressed: _isExportingPdf ? null : _exportPdf,
+              icon: _isExportingPdf
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.picture_as_pdf_outlined),
+              label: const Text('导出 PDF'),
+            )
+          : null,
     );
   }
 
-  Widget _buildEditorPane() {
+  Widget _buildEditorPane({required bool isMobile}) {
     return Container(
       color: const Color(0xFFF7F9FC),
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          padding: EdgeInsets.fromLTRB(isMobile ? 16 : 20, 8, isMobile ? 16 : 20, 24),
           child: Column(
             children: [
+              _buildMobileEnhancementSection(),
+              const SizedBox(height: 16),
               _buildTemplateSection(),
               const SizedBox(height: 16),
               _buildPersonalSection(),
@@ -179,6 +675,23 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMobileEnhancementSection() {
+    return _sectionCard(
+      title: '移动端增强',
+      subtitle: '针对手机补充拍照头像、当前位置填充与 PDF 分享能力。',
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: const [
+          _CapabilityChip(icon: Icons.camera_alt_outlined, label: '拍照头像'),
+          _CapabilityChip(icon: Icons.photo_library_outlined, label: '相册选择'),
+          _CapabilityChip(icon: Icons.near_me_outlined, label: '当前位置'),
+          _CapabilityChip(icon: Icons.share_outlined, label: '分享 PDF'),
+        ],
       ),
     );
   }
@@ -219,7 +732,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildTemplateSection() {
     return _sectionCard(
       title: '预览模板',
-      subtitle: '切换右侧简历预览的版式风格',
+      subtitle: '切换简历视觉风格，移动端与 Web 共用同一套模板。',
       child: Wrap(
         spacing: 10,
         runSpacing: 10,
@@ -242,9 +755,36 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildPersonalSection() {
     return _sectionCard(
       title: '个人信息',
-      subtitle: '单条基础信息，右侧实时预览',
+      subtitle: '基础资料、头像和定位标题会在预览与 PDF 中同步呈现。',
       child: Column(
         children: [
+          Row(
+            children: [
+              _buildAvatarPreview(),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  children: [
+                    FilledButton.icon(
+                      onPressed: _showAvatarOptions,
+                      icon: const Icon(Icons.add_a_photo_outlined),
+                      label: const Text('上传头像'),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '支持拍照上传、相册选择和即时预览，更适合手机端完善简历头像。',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        color: Color(0xFF64748B),
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           _textField(
             label: '姓名',
             initialValue: _resume.personal.name,
@@ -259,18 +799,42 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             _textField(
               label: '邮箱',
               initialValue: _resume.personal.email,
+              keyboardType: TextInputType.emailAddress,
               onChanged: (value) => setState(() => _resume.personal.email = value),
             ),
             _textField(
               label: '电话',
               initialValue: _resume.personal.phone,
+              keyboardType: TextInputType.phone,
               onChanged: (value) => setState(() => _resume.personal.phone = value),
             ),
           ),
-          _textField(
-            label: '所在地',
-            initialValue: _resume.personal.location,
-            onChanged: (value) => setState(() => _resume.personal.location = value),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _textField(
+                  label: '所在地',
+                  initialValue: _resume.personal.location,
+                  onChanged: (value) => setState(() => _resume.personal.location = value),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: OutlinedButton.icon(
+                  onPressed: _isLocating ? null : _fillCurrentLocation,
+                  icon: _isLocating
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.my_location_outlined),
+                  label: const Text('当前位置'),
+                ),
+              ),
+            ],
           ),
           _textField(
             label: '个人简介',
@@ -286,7 +850,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildEducationSection() {
     return _sectionCard(
       title: '教育经历',
-      subtitle: '支持多条教育背景',
+      subtitle: '支持多条教育背景，用于本科、交换、辅修或升学申请场景。',
       actionLabel: '新增教育',
       onAction: _addEducation,
       child: Column(
@@ -339,7 +903,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildCourseSection() {
     return _sectionCard(
       title: '课程 / 成绩亮点',
-      subtitle: '支持多条课程成绩手动录入',
+      subtitle: '保留手动录入方式，适配静态部署与移动端编辑场景。',
       actionLabel: '新增课程',
       onAction: _addCourse,
       child: Column(
@@ -386,7 +950,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildExperienceSection() {
     return _sectionCard(
       title: '实习 / 校园经历',
-      subtitle: '支持多条经历录入',
+      subtitle: '支持多条经历录入，适合手机上碎片化补充和调整。',
       actionLabel: '新增经历',
       onAction: _addExperience,
       child: Column(
@@ -432,7 +996,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildProjectSection() {
     return _sectionCard(
       title: '项目经历',
-      subtitle: '支持多条项目输入',
+      subtitle: '支持多条项目输入，适合课程项目、竞赛项目和实习项目并存。',
       actionLabel: '新增项目',
       onAction: _addProject,
       child: Column(
@@ -483,7 +1047,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildSkillSection() {
     return _sectionCard(
       title: '技能清单',
-      subtitle: '支持多条技能条目',
+      subtitle: '支持按条目维护技能、熟练度与补充说明。',
       actionLabel: '新增技能',
       onAction: _addSkill,
       child: Column(
@@ -523,7 +1087,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _buildAwardSection() {
     return _sectionCard(
       title: '奖项 / 证书',
-      subtitle: '支持多条奖项与证书',
+      subtitle: '用于补充荣誉、奖学金、竞赛成绩和资格证书。',
       actionLabel: '新增奖项',
       onAction: _addAward,
       child: Column(
@@ -566,182 +1130,181 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     );
   }
 
-  Widget _buildPreviewPane() {
+  Widget _buildPreviewPane({required bool isMobile}) {
     final theme = _template.theme;
 
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+        padding: EdgeInsets.fromLTRB(isMobile ? 16 : 24, 12, isMobile ? 16 : 24, 28),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 860),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(38, 34, 38, 40),
-              decoration: BoxDecoration(
-                color: theme.paperColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.borderColor),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 28,
-                    offset: Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildPreviewHeader(theme),
-                  const SizedBox(height: 24),
-                  _previewSection(
-                    '个人简介',
-                    _resume.personal.summary.trim().isEmpty
-                        ? const Text('请在左侧补充个人简介。')
-                        : Text(
-                            _resume.personal.summary,
-                            style: TextStyle(
-                              height: 1.6,
-                              color: theme.bodyColor,
-                            ),
-                          ),
-                  ),
-                  _previewSection(
-                    '教育经历',
-                    _resume.educations.isEmpty
-                        ? Text('暂无教育经历。', style: TextStyle(color: theme.mutedColor))
-                        : Column(
-                            children: [
-                              for (final item in _resume.educations)
-                                _previewTimelineCard(
-                                  theme: theme,
-                                  title: item.school.isEmpty ? '未填写学校' : item.school,
-                                  meta: [
-                                    item.degree,
-                                    item.major,
-                                    item.period,
-                                  ].where((value) => value.trim().isNotEmpty).join(' · '),
-                                  body: item.summary,
+            child: AspectRatio(
+              aspectRatio: isMobile ? 0.74 : 0.78,
+              child: Container(
+                padding: EdgeInsets.fromLTRB(isMobile ? 24 : 38, isMobile ? 24 : 34, isMobile ? 24 : 38, isMobile ? 26 : 40),
+                decoration: BoxDecoration(
+                  color: theme.paperColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.borderColor),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 28,
+                      offset: Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPreviewHeader(theme, isMobile: isMobile),
+                      const SizedBox(height: 24),
+                      _previewSection(
+                        '个人简介',
+                        _resume.personal.summary.trim().isEmpty
+                            ? const Text('请在左侧补充个人简介。')
+                            : Text(
+                                _resume.personal.summary,
+                                style: TextStyle(
+                                  height: 1.6,
+                                  color: theme.bodyColor,
                                 ),
-                            ],
-                          ),
+                              ),
+                      ),
+                      _previewSection(
+                        '教育经历',
+                        _resume.educations.isEmpty
+                            ? Text('暂无教育经历。', style: TextStyle(color: theme.mutedColor))
+                            : Column(
+                                children: [
+                                  for (final item in _resume.educations)
+                                    _previewTimelineCard(
+                                      theme: theme,
+                                      title: item.school.isEmpty ? '未填写学校' : item.school,
+                                      meta: [
+                                        item.degree,
+                                        item.major,
+                                        item.period,
+                                      ].where((value) => value.trim().isNotEmpty).join(' · '),
+                                      body: item.summary,
+                                    ),
+                                ],
+                              ),
+                      ),
+                      _previewSection(
+                        '成绩亮点',
+                        _resume.courses.isEmpty
+                            ? Text('暂无课程成绩亮点。', style: TextStyle(color: theme.mutedColor))
+                            : Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: [
+                                  for (final item in _resume.courses)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: theme.surfaceColor,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: theme.borderColor),
+                                      ),
+                                      child: Text(
+                                        [
+                                          item.name,
+                                          if (item.score.trim().isNotEmpty) '成绩 ${item.score}',
+                                          if (item.credit.trim().isNotEmpty) '学分 ${item.credit}',
+                                          if (item.note.trim().isNotEmpty) item.note,
+                                        ].join(' · '),
+                                        style: TextStyle(color: theme.bodyColor),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                      ),
+                      _previewSection(
+                        '实习 / 校园经历',
+                        _resume.experiences.isEmpty
+                            ? Text('暂无经历。', style: TextStyle(color: theme.mutedColor))
+                            : Column(
+                                children: [
+                                  for (final item in _resume.experiences)
+                                    _previewTimelineCard(
+                                      theme: theme,
+                                      title: item.organization.isEmpty ? '未填写组织' : item.organization,
+                                      meta: [item.role, item.period]
+                                          .where((value) => value.trim().isNotEmpty)
+                                          .join(' · '),
+                                      body: item.description,
+                                    ),
+                                ],
+                              ),
+                      ),
+                      _previewSection(
+                        '项目经历',
+                        _resume.projects.isEmpty
+                            ? Text('暂无项目经历。', style: TextStyle(color: theme.mutedColor))
+                            : Column(
+                                children: [
+                                  for (final item in _resume.projects)
+                                    _previewTimelineCard(
+                                      theme: theme,
+                                      title: item.name.isEmpty ? '未填写项目名称' : item.name,
+                                      meta: [item.role, item.period, item.stack]
+                                          .where((value) => value.trim().isNotEmpty)
+                                          .join(' · '),
+                                      body: item.description,
+                                    ),
+                                ],
+                              ),
+                      ),
+                      _previewSection(
+                        '技能清单',
+                        _resume.skills.isEmpty
+                            ? Text('暂无技能。', style: TextStyle(color: theme.mutedColor))
+                            : Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: [
+                                  for (final item in _resume.skills)
+                                    Chip(
+                                      label: Text(
+                                        [item.name, item.level, item.note]
+                                            .where((value) => value.trim().isNotEmpty)
+                                            .join(' · '),
+                                        style: TextStyle(color: theme.bodyColor),
+                                      ),
+                                      backgroundColor: theme.chipColor,
+                                      side: BorderSide(color: theme.borderColor),
+                                    ),
+                                ],
+                              ),
+                      ),
+                      _previewSection(
+                        '奖项 / 证书',
+                        _resume.awards.isEmpty
+                            ? Text('暂无奖项与证书。', style: TextStyle(color: theme.mutedColor))
+                            : Column(
+                                children: [
+                                  for (final item in _resume.awards)
+                                    _previewTimelineCard(
+                                      theme: theme,
+                                      title: item.name.isEmpty ? '未填写名称' : item.name,
+                                      meta: [item.issuer, item.date]
+                                          .where((value) => value.trim().isNotEmpty)
+                                          .join(' · '),
+                                      body: item.description,
+                                    ),
+                                ],
+                              ),
+                      ),
+                    ],
                   ),
-                  _previewSection(
-                    '成绩亮点',
-                    _resume.courses.isEmpty
-                        ? Text('暂无课程成绩亮点。', style: TextStyle(color: theme.mutedColor))
-                        : Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: [
-                              for (final item in _resume.courses)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.surfaceColor,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: theme.borderColor),
-                                  ),
-                                  child: Text(
-                                    [
-                                      item.name,
-                                      if (item.score.trim().isNotEmpty) '成绩 ${item.score}',
-                                      if (item.credit.trim().isNotEmpty) '学分 ${item.credit}',
-                                      if (item.note.trim().isNotEmpty) item.note,
-                                    ].join(' · '),
-                                    style: TextStyle(color: theme.bodyColor),
-                                  ),
-                                ),
-                            ],
-                          ),
-                  ),
-                  _previewSection(
-                    '实习 / 校园经历',
-                    _resume.experiences.isEmpty
-                        ? Text('暂无经历。', style: TextStyle(color: theme.mutedColor))
-                        : Column(
-                            children: [
-                              for (final item in _resume.experiences)
-                                _previewTimelineCard(
-                                  theme: theme,
-                                  title: item.organization.isEmpty ? '未填写组织' : item.organization,
-                                  meta: [
-                                    item.role,
-                                    item.period,
-                                  ].where((value) => value.trim().isNotEmpty).join(' · '),
-                                  body: item.description,
-                                ),
-                            ],
-                          ),
-                  ),
-                  _previewSection(
-                    '项目经历',
-                    _resume.projects.isEmpty
-                        ? Text('暂无项目经历。', style: TextStyle(color: theme.mutedColor))
-                        : Column(
-                            children: [
-                              for (final item in _resume.projects)
-                                _previewTimelineCard(
-                                  theme: theme,
-                                  title: item.name.isEmpty ? '未填写项目名称' : item.name,
-                                  meta: [
-                                    item.role,
-                                    item.period,
-                                    item.stack,
-                                  ].where((value) => value.trim().isNotEmpty).join(' · '),
-                                  body: item.description,
-                                ),
-                            ],
-                          ),
-                  ),
-                  _previewSection(
-                    '技能清单',
-                    _resume.skills.isEmpty
-                        ? Text('暂无技能。', style: TextStyle(color: theme.mutedColor))
-                        : Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: [
-                              for (final item in _resume.skills)
-                                Chip(
-                                  label: Text(
-                                    [
-                                      item.name,
-                                      if (item.level.trim().isNotEmpty) item.level,
-                                      if (item.note.trim().isNotEmpty) item.note,
-                                    ].where((value) => value.trim().isNotEmpty).join(' · '),
-                                    style: TextStyle(color: theme.bodyColor),
-                                  ),
-                                  backgroundColor: theme.chipColor,
-                                  side: BorderSide(color: theme.borderColor),
-                                ),
-                            ],
-                          ),
-                  ),
-                  _previewSection(
-                    '奖项 / 证书',
-                    _resume.awards.isEmpty
-                        ? Text('暂无奖项与证书。', style: TextStyle(color: theme.mutedColor))
-                        : Column(
-                            children: [
-                              for (final item in _resume.awards)
-                                _previewTimelineCard(
-                                  theme: theme,
-                                  title: item.name.isEmpty ? '未填写名称' : item.name,
-                                  meta: [
-                                    item.issuer,
-                                    item.date,
-                                  ].where((value) => value.trim().isNotEmpty).join(' · '),
-                                  body: item.description,
-                                ),
-                            ],
-                          ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -750,64 +1313,94 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     );
   }
 
-  Widget _buildPreviewHeader(ResumeTemplateTheme theme) {
+  Widget _buildPreviewHeader(ResumeTemplateTheme theme, {required bool isMobile}) {
     final contactItems = [
       _resume.personal.email,
       _resume.personal.phone,
       _resume.personal.location,
     ].where((value) => value.trim().isNotEmpty).toList();
 
+    final headerText = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _resume.personal.name.trim().isEmpty ? '你的姓名' : _resume.personal.name,
+          style: TextStyle(
+            fontSize: isMobile ? 28 : 34,
+            fontWeight: FontWeight.w800,
+            color: theme.headerColor,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _resume.personal.title.trim().isEmpty ? '你的定位标题' : _resume.personal.title,
+          style: TextStyle(
+            fontSize: isMobile ? 16 : 18,
+            color: theme.mutedColor,
+          ),
+        ),
+      ],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
+        if (isMobile)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _resume.personal.name.trim().isEmpty ? '你的姓名' : _resume.personal.name,
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      color: theme.headerColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _resume.personal.title.trim().isEmpty
-                        ? '你的定位标题'
-                        : _resume.personal.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: theme.mutedColor,
-                    ),
-                  ),
+                  if (_resume.personal.avatarBytes != null) ...[
+                    _buildPreviewAvatar(size: 68),
+                    const SizedBox(width: 14),
+                  ],
+                  Expanded(child: headerText),
                 ],
               ),
-            ),
-            if (contactItems.isNotEmpty)
-              SizedBox(
-                width: 220,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              if (contactItems.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     for (final item in contactItems)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          item,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(color: theme.mutedColor),
-                        ),
-                      ),
+                      _buildContactPill(theme, item),
                   ],
                 ),
-              ),
-          ],
-        ),
+              ],
+            ],
+          )
+        else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_resume.personal.avatarBytes != null) ...[
+                _buildPreviewAvatar(size: 88),
+                const SizedBox(width: 18),
+              ],
+              Expanded(child: headerText),
+              if (contactItems.isNotEmpty)
+                SizedBox(
+                  width: 220,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (final item in contactItems)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            item,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(color: theme.mutedColor),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         const SizedBox(height: 20),
         Container(
           height: 4,
@@ -818,6 +1411,24 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildContactPill(ResumeTemplateTheme theme, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: theme.surfaceColor,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: theme.borderColor),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: theme.mutedColor,
+          fontSize: 12.5,
+        ),
+      ),
     );
   }
 
@@ -1007,12 +1618,14 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     required ValueChanged<String> onChanged,
     int maxLines = 1,
     String? hintText,
+    TextInputType? keyboardType,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         initialValue: initialValue,
         maxLines: maxLines,
+        keyboardType: keyboardType,
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
@@ -1030,7 +1643,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   Widget _twoColumns(Widget left, Widget right) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 360) {
+        if (constraints.maxWidth < 420) {
           return Column(children: [left, right]);
         }
 
@@ -1043,6 +1656,78 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildAvatarPreview() {
+    final bytes = _resume.personal.avatarBytes;
+    return Container(
+      width: 88,
+      height: 110,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F6FB),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFDCE4EF)),
+        image: bytes == null
+            ? null
+            : DecorationImage(
+                image: MemoryImage(bytes),
+                fit: BoxFit.cover,
+              ),
+      ),
+      child: bytes == null
+          ? const Center(
+              child: Icon(
+                Icons.account_circle_outlined,
+                size: 42,
+                color: Color(0xFF8A94A6),
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildPreviewAvatar({required double size}) {
+    final bytes = _resume.personal.avatarBytes;
+    if (bytes == null) return const SizedBox.shrink();
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size * 0.24),
+        image: DecorationImage(
+          image: MemoryImage(bytes),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
+
+class _CapabilityChip extends StatelessWidget {
+  const _CapabilityChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F8FC),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFDCE4EF)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF2563EB)),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
+      ),
     );
   }
 }
@@ -1074,12 +1759,12 @@ class ResumeData {
     return ResumeData(
       personal: PersonalInfo(
         name: '示例学生',
-        title: '计算机方向申请者 / Web 项目实践者',
+        title: '计算机方向申请者 / 移动端项目实践者',
         email: 'demo@example.com',
-        phone: '000-0000-0000',
+        phone: '138-0000-0000',
         location: '上海',
         summary:
-            '具备前端开发、静态网站部署和课程项目整理基础，能独立完成需求分析、界面实现、联调验证与交付说明编写，关注结构化表达与可复现交付。',
+            '具备 Flutter、静态部署与课程项目整理经验，能独立完成移动端信息录入、界面实现、导出交付和版本发布，关注简历内容结构化表达与实际投递效率。',
       ),
       educations: [
         EducationEntry(
@@ -1106,27 +1791,26 @@ class ResumeData {
           organization: '创新实验课程项目组',
           role: '前端开发',
           period: '2024.03 - 2024.06',
-          description:
-              '负责工作台界面实现、表单交互与静态部署，输出运行说明和功能复现文档。',
+          description: '负责移动端工作台界面实现、表单交互、真机调试和静态部署说明整理。',
         ),
       ],
       projects: [
         ProjectEntry(
           id: IdFactory.next(),
           name: 'AI Resume Generator',
-          role: '项目改造',
+          role: 'Flutter 改造',
           period: '2026.06',
-          stack: 'Flutter Web / GitHub Pages / Jekyll',
+          stack: 'Flutter / GitHub Pages / Jekyll',
           description:
-              '将旧的 Jekyll 静态页升级为 Flutter Web 编辑器，支持多条经历维护、课程成绩录入、右侧简历预览与 PDF 导出。',
+              '在保留 Jekyll 经典版的同时，补充 Flutter 工作台的移动端布局、头像上传、当前位置填充和统一 PDF 导出能力。',
         ),
       ],
       skills: [
         SkillEntry(
           id: IdFactory.next(),
-          name: 'Flutter Web',
+          name: 'Flutter',
           level: '熟练',
-          note: '界面搭建与 GitHub Pages 部署',
+          note: '移动端适配与真机调试',
         ),
         SkillEntry(
           id: IdFactory.next(),
@@ -1141,7 +1825,7 @@ class ResumeData {
           name: '课程项目实践',
           issuer: '创新实验课程',
           date: '2026',
-          description: '完成静态站点升级、在线部署与前后端联调。',
+          description: '完成静态站升级、双版本保留、真机调试与在线部署。 ',
         ),
       ],
     );
@@ -1156,6 +1840,7 @@ class PersonalInfo {
     required this.phone,
     required this.location,
     required this.summary,
+    this.avatarBytes,
   });
 
   String name;
@@ -1164,6 +1849,7 @@ class PersonalInfo {
   String phone;
   String location;
   String summary;
+  Uint8List? avatarBytes;
 }
 
 class EducationEntry implements Identifiable {

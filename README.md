@@ -48,7 +48,7 @@ https://xuanxuanwuhh.github.io/ai-resume-generator.github.io/legacy-jekyll/
 
 ### 3. Flutter 工作台
 
-这是现在的主编辑器，支持：
+这是现在的主编辑器，已经按移动端场景继续增强，支持：
 
 - 多条教育经历
 - 多条课程成绩
@@ -56,8 +56,10 @@ https://xuanxuanwuhh.github.io/ai-resume-generator.github.io/legacy-jekyll/
 - 多条项目经历
 - 多条技能
 - 多条奖项 / 证书
-- 右侧实时简历预览
-- 浏览器导出 PDF
+- 手机端编辑 / 预览切换
+- 头像拍照上传、相册选择与即时预览
+- 当前城市定位填充
+- 统一 PDF 导出 / 打印 / 分享
 
 在线地址：
 
@@ -73,6 +75,13 @@ https://xuanxuanwuhh.github.io/ai-resume-generator.github.io/flutter-version/
 Set-Location -LiteralPath ".\flutter-version"
 flutter pub get
 flutter run -d chrome
+```
+
+真机调试：
+
+```powershell
+flutter devices
+flutter run -d <device-id>
 ```
 
 ## 校验命令

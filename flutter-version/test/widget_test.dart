@@ -14,7 +14,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('AI 简历工作台'), findsOneWidget);
-    expect(find.text('导出 PDF'), findsOneWidget);
+    expect(find.text('移动端增强'), findsOneWidget);
+    expect(find.text('上传头像'), findsOneWidget);
     expect(find.text('教育经历'), findsWidgets);
     expect(find.text('项目经历'), findsWidgets);
   });
