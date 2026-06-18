@@ -285,6 +285,10 @@ button {
   min-height: 100vh;
 }
 
+.app-shell-legacy {
+  grid-template-columns: minmax(380px, 460px) minmax(760px, 1fr);
+}
+
 .control-pane,
 .assistant-pane {
   min-width: 0;
@@ -385,6 +389,89 @@ button {
 
 .panel.compact {
   padding-bottom: 16px;
+}
+
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 12px;
+}
+
+.ghost-action {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary);
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ghost-action:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.entry-list {
+  display: grid;
+  gap: 12px;
+}
+
+.entry-empty {
+  padding: 14px 16px;
+  border: 1px dashed rgba(0, 0, 0, 0.14);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.56);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.entry-item {
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.entry-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.entry-item-head strong {
+  font-size: 14px;
+}
+
+.entry-item-remove {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(190, 18, 60, 0.16);
+  border-radius: 999px;
+  background: #fff5f7;
+  color: var(--rose);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.entry-item-remove:hover {
+  background: #ffe4e8;
+  border-color: rgba(190, 18, 60, 0.28);
+}
+
+.entry-item-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.entry-item-grid .wide {
+  grid-column: 1 / -1;
 }
 
 .panel-title {
@@ -544,15 +631,19 @@ textarea::placeholder {
   align-items: end;
   gap: 12px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .toolbar label {
   min-width: 140px;
+  flex: 0 0 140px;
 }
 
 .toolbar button,
 .primary-action {
   min-height: 42px;
+  min-width: 132px;
   border: 0;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -560,6 +651,7 @@ textarea::placeholder {
   padding: 0 18px;
   font-size: 13px;
   font-weight: 800;
+  white-space: nowrap;
   transition: all var(--transition-fast);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
@@ -620,6 +712,24 @@ textarea::placeholder {
   border-bottom: 3px solid var(--primary);
 }
 
+.resume-head-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.avatar-preview {
+  width: 86px;
+  height: 86px;
+  border-radius: 18px;
+  background-color: #dbe5f4;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  flex-shrink: 0;
+}
+
 .resume-head h2 {
   margin: 0;
   font-size: 36px;
@@ -661,6 +771,31 @@ textarea::placeholder {
   color: #334155;
   line-height: 1.8;
   font-size: 14px;
+}
+
+.preview-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.preview-card {
+  padding: 14px 16px;
+  border: 1px solid #d7e0ec;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #f9fbff 0%, #f4f7fb 100%);
+}
+
+.preview-card strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.preview-card small {
+  display: block;
+  margin-bottom: 8px;
+  color: #667085;
+  font-size: 12px;
 }
 
 .tag-list {
@@ -983,6 +1118,10 @@ body[data-lang="en"] .result-box:empty::before {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .entry-item-grid {
+    grid-template-columns: 1fr;
+  }
+
   .topbar,
   .resume-head,
   .toolbar {
@@ -1085,6 +1224,10 @@ body[data-lang="en"] .result-box:empty::before {
     gap: 12px;
   }
 
+  .entry-item-grid {
+    grid-template-columns: 1fr;
+  }
+
   .case-btn {
     min-height: 40px;
   }
@@ -1122,6 +1265,11 @@ body[data-lang="en"] .result-box:empty::before {
   .resume-head {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .resume-head-main {
+    flex-direction: column;
+    gap: 12px;
   }
 
   .resume-head h2 {

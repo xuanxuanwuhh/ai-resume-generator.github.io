@@ -1,9 +1,4 @@
-import 'dart:convert';
-
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import 'printing/print_helper.dart' as print_helper;
 
@@ -34,37 +29,7 @@ class ResumeWorkbenchPage extends StatefulWidget {
 
 class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   final ResumeData _resume = ResumeData.sample();
-  late final TextEditingController _apiBaseController;
-
-  bool _ocrBusy = false;
-  bool _apiChecking = false;
-  String _apiStatus =
-      '可连接本地 FastAPI 或线上 HTTPS OCR 服务。';
-  String _ocrStatus =
-      '上传 PDF、docx 或图片后，将通过后端 /api/transcript/parse 接口识别课程。';
-  String _ocrRawText = '';
-  List<CourseCandidate> _ocrCandidates = const [];
-
-  bool get _needsHttpsBackend => kIsWeb && Uri.base.scheme == 'https';
-
-  @override
-  void initState() {
-    super.initState();
-    _apiBaseController = TextEditingController(text: _defaultApiBase());
-  }
-
-  @override
-  void dispose() {
-    _apiBaseController.dispose();
-    super.dispose();
-  }
-
-  String _defaultApiBase() {
-    if (_needsHttpsBackend) {
-      return 'https://your-ocr-backend.example.com';
-    }
-    return 'http://127.0.0.1:8000';
-  }
+  ResumeTemplate _template = ResumeTemplate.modern;
 
   void _showMessage(String message) {
     if (!mounted) return;
@@ -73,238 +38,11 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     );
   }
 
-  Future<void> _checkApiHealth() async {
-    final apiBase = _normalizedApiBase();
-    if (apiBase == null) {
-      setState(() {
-        _apiStatus = '请先填写 API 地址。';
-      });
-      return;
-    }
-
-    setState(() {
-      _apiChecking = true;
-      _apiStatus = '正在检查 API 连通性...';
-    });
-
-    try {
-      final response = await http.get(Uri.parse(apiBase));
-      final body = response.body;
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        setState(() {
-          _apiChecking = false;
-          _apiStatus = body.contains('AI Resume Generator API')
-              ? 'API 已连通，OCR 接口可继续联调。'
-              : 'API 已响应，但请确认这是 OCR 后端服务。';
-        });
-        return;
-      }
-      setState(() {
-        _apiChecking = false;
-        _apiStatus = 'API 响应异常：${response.statusCode}';
-      });
-    } catch (error) {
-      setState(() {
-        _apiChecking = false;
-        _apiStatus = 'API 检查失败：${error.toString().replaceFirst('Exception: ', '')}';
-      });
-    }
-  }
-
   void _exportPdf() {
     final didTrigger = print_helper.triggerPrint();
     if (!didTrigger) {
       _showMessage('当前平台不支持浏览器打印。');
     }
-  }
-
-  String? _normalizedApiBase() {
-    final raw = _apiBaseController.text.trim();
-    if (raw.isEmpty) return null;
-    return raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
-  }
-
-  Future<void> _pickTranscriptFile() async {
-    final picked = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      withData: true,
-      type: FileType.custom,
-      allowedExtensions: const ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'webp'],
-    );
-
-    if (picked == null || picked.files.isEmpty) {
-      return;
-    }
-
-    final file = picked.files.single;
-    final bytes = file.bytes;
-    if (bytes == null || bytes.isEmpty) {
-      setState(() {
-        _ocrStatus = '没有读取到文件内容，请重新选择文件。';
-      });
-      return;
-    }
-
-    final apiBase = _normalizedApiBase();
-    if (apiBase == null) {
-      setState(() {
-        _ocrStatus = '请先填写 OCR 后端地址。';
-      });
-      return;
-    }
-
-    setState(() {
-      _ocrBusy = true;
-      _ocrStatus = '正在上传成绩单并调用 OCR 接口...';
-      _ocrRawText = '';
-      _ocrCandidates = const [];
-    });
-
-    try {
-      final result = await _parseTranscriptWithBackend(
-        apiBase: apiBase,
-        fileName: file.name,
-        bytes: bytes,
-      );
-
-      final courses = _sortCourses(result.courses);
-      setState(() {
-        _ocrBusy = false;
-        _ocrStatus = result.message.isEmpty
-            ? '识别完成，已按成绩和学分排序。'
-            : result.message;
-        _ocrRawText = result.rawText;
-        _ocrCandidates = [
-          for (var i = 0; i < courses.length; i += 1)
-            CourseCandidate.fromCourse(
-              courses[i],
-              selected: i < 6,
-            ),
-        ];
-      });
-    } catch (error) {
-      setState(() {
-        _ocrBusy = false;
-        _ocrStatus = error.toString().replaceFirst('Exception: ', '');
-      });
-    }
-  }
-
-  Future<TranscriptParseResult> _parseTranscriptWithBackend({
-    required String apiBase,
-    required String fileName,
-    required Uint8List bytes,
-  }) async {
-    final uri = Uri.parse('$apiBase/api/transcript/parse');
-    final request = http.MultipartRequest('POST', uri)
-      ..files.add(
-        http.MultipartFile.fromBytes(
-          'file',
-          bytes,
-          filename: fileName,
-        ),
-      );
-
-    final response = await request.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'OCR 接口失败 ${response.statusCode}：${body.isEmpty ? '空响应' : body}',
-      );
-    }
-
-    final decoded = json.decode(body);
-    if (decoded is! Map<String, dynamic>) {
-      throw Exception('OCR 接口返回格式不正确。');
-    }
-
-    return TranscriptParseResult.fromJson(decoded);
-  }
-
-  List<CourseEntry> _sortCourses(List<CourseEntry> items) {
-    final sorted = [...items];
-    sorted.sort((a, b) {
-      final scoreDelta = _scoreRank(b.score).compareTo(_scoreRank(a.score));
-      if (scoreDelta != 0) return scoreDelta;
-      final creditDelta = _creditRank(b.credit).compareTo(_creditRank(a.credit));
-      if (creditDelta != 0) return creditDelta;
-      return a.name.compareTo(b.name);
-    });
-    return sorted;
-  }
-
-  double _scoreRank(String value) {
-    const gradeMap = {
-      '优秀': 95.0,
-      '良好': 85.0,
-      '中等': 75.0,
-      '及格': 65.0,
-      '合格': 60.0,
-      '通过': 60.0,
-    };
-    if (gradeMap.containsKey(value)) {
-      return gradeMap[value]!;
-    }
-    return double.tryParse(value) ?? 0;
-  }
-
-  double _creditRank(String value) {
-    return double.tryParse(value) ?? 0;
-  }
-
-  void _selectRecommendedCourses() {
-    setState(() {
-      _ocrCandidates = [
-        for (var i = 0; i < _ocrCandidates.length; i += 1)
-          _ocrCandidates[i].copyWith(selected: i < 6),
-      ];
-    });
-  }
-
-  void _toggleCandidate(String id, bool selected) {
-    setState(() {
-      _ocrCandidates = [
-        for (final item in _ocrCandidates)
-          item.id == id ? item.copyWith(selected: selected) : item,
-      ];
-    });
-  }
-
-  void _appendSelectedCourses() {
-    final selected = _ocrCandidates.where((item) => item.selected).toList();
-    if (selected.isEmpty) {
-      _showMessage('请先勾选要加入简历的课程。');
-      return;
-    }
-
-    final existingKeys = _resume.courses
-        .map((item) => '${item.name}|${item.score}|${item.credit}')
-        .toSet();
-    var addedCount = 0;
-
-    setState(() {
-      for (final item in selected) {
-        final key = '${item.name}|${item.score}|${item.credit}';
-        if (existingKeys.contains(key)) {
-          continue;
-        }
-        _resume.courses.add(
-          CourseEntry(
-            id: IdFactory.next(),
-            name: item.name,
-            score: item.score,
-            credit: item.credit,
-            note: '',
-          ),
-        );
-        existingKeys.add(key);
-        addedCount += 1;
-      }
-      _ocrCandidates = const [];
-    });
-
-    _showMessage('已加入 $addedCount 门课程。');
   }
 
   void _addEducation() {
@@ -366,12 +104,16 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             ),
             SizedBox(height: 2),
             Text(
-              'Flutter Web 版：多条经历编辑 + 成绩单 OCR 导入',
+              'Flutter Web 版：多条经历编辑与实时简历预览',
               style: TextStyle(fontSize: 13, color: Color(0xFF5B6472)),
             ),
           ],
         ),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: _buildTemplatePicker(),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: FilledButton.icon(
@@ -419,6 +161,8 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             children: [
+              _buildTemplateSection(),
+              const SizedBox(height: 16),
               _buildPersonalSection(),
               const SizedBox(height: 16),
               _buildEducationSection(),
@@ -435,6 +179,62 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTemplatePicker() {
+    return DropdownButtonHideUnderline(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFD7E0EC)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: DropdownButton<ResumeTemplate>(
+            value: _template,
+            borderRadius: BorderRadius.circular(12),
+            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+            items: [
+              for (final template in ResumeTemplate.values)
+                DropdownMenuItem(
+                  value: template,
+                  child: Text(template.label),
+                ),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _template = value;
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTemplateSection() {
+    return _sectionCard(
+      title: '预览模板',
+      subtitle: '切换右侧简历预览的版式风格',
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: [
+          for (final template in ResumeTemplate.values)
+            ChoiceChip(
+              label: Text(template.label),
+              selected: _template == template,
+              onSelected: (_) {
+                setState(() {
+                  _template = template;
+                });
+              },
+            ),
+        ],
       ),
     );
   }
@@ -538,199 +338,46 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
 
   Widget _buildCourseSection() {
     return _sectionCard(
-      title: '成绩亮点 / OCR 导入',
-      subtitle: '支持手动录入，也支持调用后端 OCR 接口导入成绩单课程',
+      title: '课程 / 成绩亮点',
+      subtitle: '支持多条课程成绩手动录入',
       actionLabel: '新增课程',
       onAction: _addCourse,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 14),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF6F8FC),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFD6DEEA)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'API 配置',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _needsHttpsBackend
-                      ? '当前在线页面需要 HTTPS OCR 后端；本地 http://127.0.0.1:8000 无法直接被 https 页面调用。'
-                      : '本地调试可直接连接参考后端 D:\\BiographicalNotes\\ai-resume-backend。',
-                  style: const TextStyle(
-                    color: Color(0xFF516072),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  _apiStatus,
-                  style: const TextStyle(
-                    color: Color(0xFF214C9A),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: _apiChecking ? null : _checkApiHealth,
-                      icon: const Icon(Icons.wifi_tethering_outlined),
-                      label: Text(_apiChecking ? '检查中...' : '检查 API'),
-                    ),
-                    const _MiniHint(label: '根路径', value: 'GET /'),
-                    const _MiniHint(label: 'OCR 接口', value: 'POST /api/transcript/parse'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: TextField(
-              controller: _apiBaseController,
-              decoration: InputDecoration(
-                labelText: 'OCR 后端地址',
-                hintText: _needsHttpsBackend
-                    ? 'https://your-ocr-backend.example.com'
-                    : 'http://127.0.0.1:8000',
-                filled: true,
-                fillColor: const Color(0xFFFCFDFE),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-          ),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              FilledButton.icon(
-                onPressed: _ocrBusy ? null : _pickTranscriptFile,
-                icon: const Icon(Icons.upload_file_outlined),
-                label: Text(_ocrBusy ? '识别中...' : '上传成绩单'),
-              ),
-              OutlinedButton.icon(
-                onPressed: _ocrCandidates.isEmpty ? null : _selectRecommendedCourses,
-                icon: const Icon(Icons.auto_awesome_outlined),
-                label: const Text('推荐前 6 门'),
-              ),
-              OutlinedButton.icon(
-                onPressed: _ocrCandidates.isEmpty ? null : _appendSelectedCourses,
-                icon: const Icon(Icons.playlist_add_outlined),
-                label: const Text('加入已选课程'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _ocrStatus,
-            style: const TextStyle(color: Color(0xFF516072), height: 1.5),
-          ),
-          if (_ocrCandidates.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF6F8FC),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFD6DEEA)),
-              ),
+          for (final item in _resume.courses)
+            _entryCard(
+              keyValue: item.id,
+              title: item.name.isEmpty ? '未命名课程' : item.name,
+              onRemove: () => _removeById(_resume.courses, item.id),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '识别候选课程',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 10),
-                  for (final item in _ocrCandidates)
-                    CheckboxListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      value: item.selected,
-                      onChanged: (value) => _toggleCandidate(item.id, value ?? false),
-                      title: Text(item.name),
-                      subtitle: Text(
-                        '成绩 ${item.score.isEmpty ? "-" : item.score} / 学分 ${item.credit.isEmpty ? "-" : item.credit}',
-                      ),
+                  _twoColumns(
+                    _textField(
+                      label: '课程名称',
+                      initialValue: item.name,
+                      onChanged: (value) => setState(() => item.name = value),
                     ),
+                    _textField(
+                      label: '成绩',
+                      initialValue: item.score,
+                      onChanged: (value) => setState(() => item.score = value),
+                    ),
+                  ),
+                  _twoColumns(
+                    _textField(
+                      label: '学分',
+                      initialValue: item.credit,
+                      onChanged: (value) => setState(() => item.credit = value),
+                    ),
+                    _textField(
+                      label: '备注',
+                      initialValue: item.note,
+                      onChanged: (value) => setState(() => item.note = value),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-          if (_ocrRawText.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: EdgeInsets.zero,
-              title: const Text('查看 OCR 原始文本'),
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF6F8FC),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD6DEEA)),
-                  ),
-                  child: SelectableText(
-                    _ocrRawText,
-                    style: const TextStyle(height: 1.5),
-                  ),
-                ),
-              ],
-            ),
-          ],
-          if (_resume.courses.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            for (final item in _resume.courses)
-              _entryCard(
-                keyValue: item.id,
-                title: item.name.isEmpty ? '未命名课程' : item.name,
-                onRemove: () => _removeById(_resume.courses, item.id),
-                child: Column(
-                  children: [
-                    _twoColumns(
-                      _textField(
-                        label: '课程名称',
-                        initialValue: item.name,
-                        onChanged: (value) => setState(() => item.name = value),
-                      ),
-                      _textField(
-                        label: '成绩',
-                        initialValue: item.score,
-                        onChanged: (value) => setState(() => item.score = value),
-                      ),
-                    ),
-                    _twoColumns(
-                      _textField(
-                        label: '学分',
-                        initialValue: item.credit,
-                        onChanged: (value) => setState(() => item.credit = value),
-                      ),
-                      _textField(
-                        label: '备注',
-                        initialValue: item.note,
-                        onChanged: (value) => setState(() => item.note = value),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
         ],
       ),
     );
@@ -920,6 +567,8 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   }
 
   Widget _buildPreviewPane() {
+    final theme = _template.theme;
+
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
@@ -930,10 +579,10 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
             child: Container(
               padding: const EdgeInsets.fromLTRB(38, 34, 38, 40),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.paperColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFD8E0EB)),
-                boxShadow: const [
+                border: Border.all(color: theme.borderColor),
+                boxShadow: [
                   BoxShadow(
                     color: Color(0x14000000),
                     blurRadius: 28,
@@ -944,7 +593,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildPreviewHeader(),
+                  _buildPreviewHeader(theme),
                   const SizedBox(height: 24),
                   _previewSection(
                     '个人简介',
@@ -952,17 +601,21 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                         ? const Text('请在左侧补充个人简介。')
                         : Text(
                             _resume.personal.summary,
-                            style: const TextStyle(height: 1.6),
+                            style: TextStyle(
+                              height: 1.6,
+                              color: theme.bodyColor,
+                            ),
                           ),
                   ),
                   _previewSection(
                     '教育经历',
                     _resume.educations.isEmpty
-                        ? const Text('暂无教育经历。')
+                        ? Text('暂无教育经历。', style: TextStyle(color: theme.mutedColor))
                         : Column(
                             children: [
                               for (final item in _resume.educations)
                                 _previewTimelineCard(
+                                  theme: theme,
                                   title: item.school.isEmpty ? '未填写学校' : item.school,
                                   meta: [
                                     item.degree,
@@ -977,7 +630,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                   _previewSection(
                     '成绩亮点',
                     _resume.courses.isEmpty
-                        ? const Text('暂无课程成绩亮点。')
+                        ? Text('暂无课程成绩亮点。', style: TextStyle(color: theme.mutedColor))
                         : Wrap(
                             spacing: 10,
                             runSpacing: 10,
@@ -989,9 +642,9 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                                     vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF5F7FB),
+                                    color: theme.surfaceColor,
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: const Color(0xFFD8E0EB)),
+                                    border: Border.all(color: theme.borderColor),
                                   ),
                                   child: Text(
                                     [
@@ -1000,6 +653,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                                       if (item.credit.trim().isNotEmpty) '学分 ${item.credit}',
                                       if (item.note.trim().isNotEmpty) item.note,
                                     ].join(' · '),
+                                    style: TextStyle(color: theme.bodyColor),
                                   ),
                                 ),
                             ],
@@ -1008,11 +662,12 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                   _previewSection(
                     '实习 / 校园经历',
                     _resume.experiences.isEmpty
-                        ? const Text('暂无经历。')
+                        ? Text('暂无经历。', style: TextStyle(color: theme.mutedColor))
                         : Column(
                             children: [
                               for (final item in _resume.experiences)
                                 _previewTimelineCard(
+                                  theme: theme,
                                   title: item.organization.isEmpty ? '未填写组织' : item.organization,
                                   meta: [
                                     item.role,
@@ -1026,11 +681,12 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                   _previewSection(
                     '项目经历',
                     _resume.projects.isEmpty
-                        ? const Text('暂无项目经历。')
+                        ? Text('暂无项目经历。', style: TextStyle(color: theme.mutedColor))
                         : Column(
                             children: [
                               for (final item in _resume.projects)
                                 _previewTimelineCard(
+                                  theme: theme,
                                   title: item.name.isEmpty ? '未填写项目名称' : item.name,
                                   meta: [
                                     item.role,
@@ -1045,7 +701,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                   _previewSection(
                     '技能清单',
                     _resume.skills.isEmpty
-                        ? const Text('暂无技能。')
+                        ? Text('暂无技能。', style: TextStyle(color: theme.mutedColor))
                         : Wrap(
                             spacing: 10,
                             runSpacing: 10,
@@ -1058,9 +714,10 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                                       if (item.level.trim().isNotEmpty) item.level,
                                       if (item.note.trim().isNotEmpty) item.note,
                                     ].where((value) => value.trim().isNotEmpty).join(' · '),
+                                    style: TextStyle(color: theme.bodyColor),
                                   ),
-                                  backgroundColor: const Color(0xFFEFF4FF),
-                                  side: const BorderSide(color: Color(0xFFD5E1FF)),
+                                  backgroundColor: theme.chipColor,
+                                  side: BorderSide(color: theme.borderColor),
                                 ),
                             ],
                           ),
@@ -1068,11 +725,12 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                   _previewSection(
                     '奖项 / 证书',
                     _resume.awards.isEmpty
-                        ? const Text('暂无奖项与证书。')
+                        ? Text('暂无奖项与证书。', style: TextStyle(color: theme.mutedColor))
                         : Column(
                             children: [
                               for (final item in _resume.awards)
                                 _previewTimelineCard(
+                                  theme: theme,
                                   title: item.name.isEmpty ? '未填写名称' : item.name,
                                   meta: [
                                     item.issuer,
@@ -1092,7 +750,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
     );
   }
 
-  Widget _buildPreviewHeader() {
+  Widget _buildPreviewHeader(ResumeTemplateTheme theme) {
     final contactItems = [
       _resume.personal.email,
       _resume.personal.phone,
@@ -1111,10 +769,10 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                 children: [
                   Text(
                     _resume.personal.name.trim().isEmpty ? '你的姓名' : _resume.personal.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A2433),
+                      color: theme.headerColor,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1122,9 +780,9 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                     _resume.personal.title.trim().isEmpty
                         ? '你的定位标题'
                         : _resume.personal.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
-                      color: Color(0xFF455468),
+                      color: theme.mutedColor,
                     ),
                   ),
                 ],
@@ -1142,7 +800,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
                         child: Text(
                           item,
                           textAlign: TextAlign.right,
-                          style: const TextStyle(color: Color(0xFF455468)),
+                          style: TextStyle(color: theme.mutedColor),
                         ),
                       ),
                   ],
@@ -1155,7 +813,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
           height: 4,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF2F6BFF),
+            color: theme.accentColor,
             borderRadius: BorderRadius.circular(999),
           ),
         ),
@@ -1164,6 +822,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   }
 
   Widget _previewSection(String title, Widget child) {
+    final theme = _template.theme;
     return Padding(
       padding: const EdgeInsets.only(top: 22),
       child: Column(
@@ -1171,10 +830,10 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2F6BFF),
+              color: theme.sectionColor,
             ),
           ),
           const SizedBox(height: 14),
@@ -1185,6 +844,7 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
   }
 
   Widget _previewTimelineCard({
+    required ResumeTemplateTheme theme,
     required String title,
     required String meta,
     required String body,
@@ -1194,32 +854,36 @@ class _ResumeWorkbenchPageState extends State<ResumeWorkbenchPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFD),
+        color: theme.surfaceColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFDCE4EF)),
+        border: Border.all(color: theme.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
+              color: theme.headerColor,
             ),
           ),
           if (meta.trim().isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               meta,
-              style: const TextStyle(color: Color(0xFF5A6778)),
+              style: TextStyle(color: theme.mutedColor),
             ),
           ],
           if (body.trim().isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
               body,
-              style: const TextStyle(height: 1.6),
+              style: TextStyle(
+                height: 1.6,
+                color: theme.bodyColor,
+              ),
             ),
           ],
         ],
@@ -1452,9 +1116,9 @@ class ResumeData {
           name: 'AI Resume Generator',
           role: '项目改造',
           period: '2026.06',
-          stack: 'Flutter Web / GitHub Pages / FastAPI OCR',
+          stack: 'Flutter Web / GitHub Pages / Jekyll',
           description:
-              '将旧的 Jekyll 静态页升级为 Flutter Web 编辑器，支持多条经历维护、右侧简历预览与成绩单 OCR 导入。',
+              '将旧的 Jekyll 静态页升级为 Flutter Web 编辑器，支持多条经历维护、课程成绩录入、右侧简历预览与 PDF 导出。',
         ),
       ],
       skills: [
@@ -1466,9 +1130,9 @@ class ResumeData {
         ),
         SkillEntry(
           id: IdFactory.next(),
-          name: 'FastAPI',
-          level: '了解',
-          note: '接口联调与 OCR 上传',
+          name: 'Jekyll',
+          level: '熟练',
+          note: '静态页面维护与 GitHub Pages 发布',
         ),
       ],
       awards: [
@@ -1667,84 +1331,6 @@ class AwardEntry implements Identifiable {
   }
 }
 
-class CourseCandidate implements Identifiable {
-  const CourseCandidate({
-    required this.id,
-    required this.name,
-    required this.score,
-    required this.credit,
-    required this.selected,
-  });
-
-  factory CourseCandidate.fromCourse(CourseEntry entry, {required bool selected}) {
-    return CourseCandidate(
-      id: IdFactory.next(),
-      name: entry.name,
-      score: entry.score,
-      credit: entry.credit,
-      selected: selected,
-    );
-  }
-
-  @override
-  final String id;
-  final String name;
-  final String score;
-  final String credit;
-  final bool selected;
-
-  CourseCandidate copyWith({bool? selected}) {
-    return CourseCandidate(
-      id: id,
-      name: name,
-      score: score,
-      credit: credit,
-      selected: selected ?? this.selected,
-    );
-  }
-}
-
-class TranscriptParseResult {
-  TranscriptParseResult({
-    required this.message,
-    required this.rawText,
-    required this.courses,
-  });
-
-  final String message;
-  final String rawText;
-  final List<CourseEntry> courses;
-
-  factory TranscriptParseResult.fromJson(Map<String, dynamic> json) {
-    final rawCourses = json['courses'];
-    final courses = <CourseEntry>[];
-
-    if (rawCourses is List) {
-      for (final item in rawCourses) {
-        if (item is! Map) continue;
-        final map = item.map((key, value) => MapEntry('$key', value));
-        final name = (map['name'] ?? '').toString();
-        if (name.trim().isEmpty) continue;
-        courses.add(
-          CourseEntry(
-            id: IdFactory.next(),
-            name: name,
-            score: (map['score'] ?? '').toString(),
-            credit: (map['credit'] ?? '').toString(),
-            note: '',
-          ),
-        );
-      }
-    }
-
-    return TranscriptParseResult(
-      message: (json['message'] ?? '').toString(),
-      rawText: (json['rawText'] ?? '').toString(),
-      courses: courses,
-    );
-  }
-}
-
 class IdFactory {
   static int _counter = 0;
 
@@ -1754,39 +1340,103 @@ class IdFactory {
   }
 }
 
-class _MiniHint extends StatelessWidget {
-  const _MiniHint({
-    required this.label,
-    required this.value,
-  });
+enum ResumeTemplate {
+  modern('现代通用'),
+  blue('蓝金正式'),
+  sidebar('侧栏信息'),
+  gray('蓝灰团队'),
+  classic('经典单栏');
+
+  const ResumeTemplate(this.label);
 
   final String label;
-  final String value;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFD6DEEA)),
-      ),
-      child: RichText(
-        text: TextSpan(
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF556274),
-          ),
-          children: [
-            TextSpan(
-              text: '$label ',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            TextSpan(text: value),
-          ],
-        ),
-      ),
-    );
+  ResumeTemplateTheme get theme {
+    switch (this) {
+      case ResumeTemplate.modern:
+        return const ResumeTemplateTheme(
+          paperColor: Colors.white,
+          surfaceColor: Color(0xFFF8FAFD),
+          chipColor: Color(0xFFEFF4FF),
+          borderColor: Color(0xFFDCE4EF),
+          accentColor: Color(0xFF2F6BFF),
+          sectionColor: Color(0xFF2F6BFF),
+          headerColor: Color(0xFF1A2433),
+          bodyColor: Color(0xFF334155),
+          mutedColor: Color(0xFF5A6778),
+        );
+      case ResumeTemplate.blue:
+        return const ResumeTemplateTheme(
+          paperColor: Color(0xFFFCFDFE),
+          surfaceColor: Color(0xFFF4F7FB),
+          chipColor: Color(0xFFFFF1D6),
+          borderColor: Color(0xFFD7E1EC),
+          accentColor: Color(0xFFB8891B),
+          sectionColor: Color(0xFF132238),
+          headerColor: Color(0xFF132238),
+          bodyColor: Color(0xFF263648),
+          mutedColor: Color(0xFF5B6D82),
+        );
+      case ResumeTemplate.sidebar:
+        return const ResumeTemplateTheme(
+          paperColor: Color(0xFFFDFEFF),
+          surfaceColor: Color(0xFFF0F4F8),
+          chipColor: Color(0xFFE5EEF9),
+          borderColor: Color(0xFFD6E1EC),
+          accentColor: Color(0xFF233D63),
+          sectionColor: Color(0xFF233D63),
+          headerColor: Color(0xFF18283D),
+          bodyColor: Color(0xFF334155),
+          mutedColor: Color(0xFF607080),
+        );
+      case ResumeTemplate.gray:
+        return const ResumeTemplateTheme(
+          paperColor: Color(0xFFFBFCFD),
+          surfaceColor: Color(0xFFF2F4F7),
+          chipColor: Color(0xFFE8EDF4),
+          borderColor: Color(0xFFD7DEE7),
+          accentColor: Color(0xFF475569),
+          sectionColor: Color(0xFF334155),
+          headerColor: Color(0xFF1F2937),
+          bodyColor: Color(0xFF374151),
+          mutedColor: Color(0xFF667085),
+        );
+      case ResumeTemplate.classic:
+        return const ResumeTemplateTheme(
+          paperColor: Color(0xFFFFFEFC),
+          surfaceColor: Color(0xFFFBF8F1),
+          chipColor: Color(0xFFF6EFE1),
+          borderColor: Color(0xFFE7DDC8),
+          accentColor: Color(0xFF7C5A2A),
+          sectionColor: Color(0xFF6B4C21),
+          headerColor: Color(0xFF2B2114),
+          bodyColor: Color(0xFF463728),
+          mutedColor: Color(0xFF77624B),
+        );
+    }
   }
+}
+
+class ResumeTemplateTheme {
+  const ResumeTemplateTheme({
+    required this.paperColor,
+    required this.surfaceColor,
+    required this.chipColor,
+    required this.borderColor,
+    required this.accentColor,
+    required this.sectionColor,
+    required this.headerColor,
+    required this.bodyColor,
+    required this.mutedColor,
+  });
+
+  final Color paperColor;
+  final Color surfaceColor;
+  final Color chipColor;
+  final Color borderColor;
+  final Color accentColor;
+  final Color sectionColor;
+  final Color headerColor;
+  final Color bodyColor;
+  final Color mutedColor;
 }

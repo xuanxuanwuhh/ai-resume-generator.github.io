@@ -10,7 +10,7 @@ title: AI Resume Generator Project Overview
   <title>{{ page.title }}</title>
   <meta
     name="description"
-    content="AI Resume Generator 项目总览：保留 Jekyll 经典版，升级 Flutter Web 工作台，并提供独立 OCR API 后端。"
+    content="AI Resume Generator 项目总览：保留 Jekyll 经典版，升级 Flutter Web 工作台，形成双版本静态简历编辑方案。"
   >
   <link rel="stylesheet" href="{{ '/assets/css/landing.css' | relative_url }}">
 </head>
@@ -29,7 +29,6 @@ title: AI Resume Generator Project Overview
         <a href="#overview">概览</a>
         <a href="#versions">版本</a>
         <a href="#architecture">架构</a>
-        <a href="#api">OCR API</a>
       </nav>
 
       <div class="header-actions">
@@ -47,7 +46,7 @@ title: AI Resume Generator Project Overview
             <p class="lead">
               这个仓库现在不是单一页面，而是一个完整的项目矩阵：根页负责项目介绍与成果展示，
               <code>legacy-jekyll</code> 保留原始静态简历生成器，<code>flutter-version</code> 负责更复杂的结构化编辑，
-              <code>flutter-api</code> 承接成绩单 OCR 的后端能力。
+              两个版本都可以直接作为静态页面部署与展示。
             </p>
 
             <div class="hero-actions">
@@ -68,9 +67,9 @@ title: AI Resume Generator Project Overview
                 <small>经典版模板保留</small>
               </div>
               <div class="stat-card">
-                <dt>核心 API</dt>
-                <dd class="stat-value" data-count="1">0</dd>
-                <small>OCR transcript parse</small>
+                <dt>部署形态</dt>
+                <dd class="stat-value" data-count="2">0</dd>
+                <small>Jekyll / Flutter 静态部署</small>
               </div>
             </dl>
           </div>
@@ -84,7 +83,7 @@ title: AI Resume Generator Project Overview
                 >
                 <figcaption>
                   <strong>Flutter Web Workbench</strong>
-                  <span>多条经历编辑、OCR 接口接入、右侧实时预览</span>
+                  <span>多条经历编辑、课程录入、右侧实时预览</span>
                 </figcaption>
               </figure>
 
@@ -98,12 +97,6 @@ title: AI Resume Generator Project Overview
                   <span>无后端静态简历生成器</span>
                 </figcaption>
               </figure>
-
-              <div class="floating-note media-frame media-frame-note">
-                <span class="note-kicker">OCR API</span>
-                <strong>FastAPI + PyMuPDF + Pillow + Aliyun OCR</strong>
-                <p>前端不保存密钥，统一通过后端代理上传与识别。</p>
-              </div>
             </div>
           </div>
         </div>
@@ -135,7 +128,7 @@ title: AI Resume Generator Project Overview
           <article class="feature-card" data-tilt>
             <span>Operational Upgrade</span>
             <h3>新版本适合扩展</h3>
-            <p>Flutter 工作台承接多条结构化录入、后端 OCR 接口、部署级配置和未来 API 扩展。</p>
+            <p>Flutter 工作台承接多条结构化录入、模板切换、实时预览和浏览器导出，适合作为新版主编辑器。</p>
           </article>
         </div>
       </section>
@@ -173,7 +166,7 @@ title: AI Resume Generator Project Overview
             <ul>
               <li>左侧支持教育、课程、经历、项目、技能、奖项多条增删</li>
               <li>右侧只保留简历预览与导出 PDF</li>
-              <li>支持调用 OCR API 识别成绩单并导入课程</li>
+              <li>适合展示结构化录入与多模板预览能力</li>
             </ul>
             <a class="inline-link" href="{{ '/flutter-version/' | relative_url }}">进入 Flutter 工作台</a>
           </article>
@@ -208,7 +201,7 @@ title: AI Resume Generator Project Overview
             <img src="{{ '/report-assets/07-flutter-workbench.png' | relative_url }}" alt="Flutter 工作台截图">
             <figcaption>
               <strong>Flutter Workbench</strong>
-              <span>复杂交互、多条结构化输入、OCR 后端地址配置</span>
+              <span>复杂交互、多条结构化输入、模板切换与实时预览</span>
             </figcaption>
           </figure>
 
@@ -235,7 +228,7 @@ title: AI Resume Generator Project Overview
           <span class="section-index">04</span>
           <div>
             <h2>系统架构</h2>
-            <p>项目现在明确拆分为前台展示、经典静态版本、Flutter 主编辑器和独立 OCR 服务四层。</p>
+            <p>项目现在明确拆分为前台展示、Jekyll 经典静态版本和 Flutter 主编辑器三层。</p>
           </div>
         </div>
 
@@ -257,56 +250,9 @@ title: AI Resume Generator Project Overview
             <div class="stack-group">
               <span>Rich Editor</span>
               <h3>Flutter Web</h3>
-              <p>承接复杂表单、结构化数据、多条经历与 OCR 接口联动。</p>
-            </div>
-            <div class="stack-group">
-              <span>Backend Service</span>
-              <h3>FastAPI OCR API</h3>
-              <p>从 <code>.env</code> 读取阿里云密钥，对外暴露 <code>/api/transcript/parse</code>。</p>
+              <p>承接复杂表单、结构化数据、多条经历维护与多模板预览。</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section id="api" class="section reveal">
-        <div class="section-head">
-          <span class="section-index">05</span>
-          <div>
-            <h2>OCR API 后端</h2>
-            <p>
-              现在仓库中新增了 <code>flutter-api/</code> 目录，直接包含可运行的 FastAPI 后端。
-              这样 Flutter 页面就不再只是“预留接口”，而是有实际可联调、可部署的服务端实现。
-            </p>
-          </div>
-        </div>
-
-        <div class="api-grid">
-          <article class="api-card">
-            <h3>核心接口</h3>
-            <pre><code>POST /api/transcript/parse
-Content-Type: multipart/form-data
-file=&lt;PDF / docx / image&gt;</code></pre>
-            <p>返回候选课程、OCR 原文和友好错误信息，供 Flutter 页面勾选导入。</p>
-          </article>
-
-          <article class="api-card">
-            <h3>后端技术</h3>
-            <ul>
-              <li>FastAPI + Uvicorn</li>
-              <li>PyMuPDF 处理 PDF</li>
-              <li>Pillow 压缩和校正图片</li>
-              <li>Aliyun OCR 统一识别接口</li>
-            </ul>
-          </article>
-
-          <article class="api-card">
-            <h3>部署原则</h3>
-            <ul>
-              <li>密钥只放后端 <code>.env</code></li>
-              <li>在线 Flutter 页面必须连接 HTTPS 后端</li>
-              <li>前端只保存 API Base URL，不保存 AccessKey</li>
-            </ul>
-          </article>
         </div>
       </section>
 
@@ -316,7 +262,7 @@ file=&lt;PDF / docx / image&gt;</code></pre>
           <h2>现在你可以同时展示三个层面</h2>
           <p>
             介绍页负责讲清楚项目，Jekyll 经典版负责保留课程作业原型，
-            Flutter 工作台负责展示升级后的结构化编辑与 OCR 能力。
+            Flutter 工作台负责展示升级后的结构化编辑与多模板预览能力。
           </p>
         </div>
         <div class="closing-actions">

@@ -14,23 +14,6 @@
 - 奖项 / 证书多条录入
 - 右侧实时简历预览
 - 浏览器导出 PDF
-- 成绩单 OCR 导入
-
-## OCR 接法
-
-Flutter Web 本身也是前端，不能安全放阿里云密钥。
-
-当前实现方式是：
-
-```text
-Flutter Web -> FastAPI OCR Backend -> Aliyun OCR
-```
-
-后端目录已经放进当前仓库：
-
-```text
-../flutter-api/
-```
 
 ## 本地运行
 
@@ -38,25 +21,6 @@ Flutter Web -> FastAPI OCR Backend -> Aliyun OCR
 Set-Location -LiteralPath ".\flutter-version"
 flutter pub get
 flutter run -d chrome
-```
-
-## 本地联调 OCR
-
-先启动后端：
-
-```powershell
-Set-Location -LiteralPath ".\flutter-api"
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-然后在 Flutter 页面中填：
-
-```text
-http://127.0.0.1:8000
 ```
 
 ## 验证

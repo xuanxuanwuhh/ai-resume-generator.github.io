@@ -1,298 +1,20 @@
 (function () {
-  function applyGlassStyle() {
-    const style = document.createElement('style');
-    style.textContent = `
-      .glass-button {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        border-radius: 12px;
-        color: inherit;
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-      }
-      .glass-button:hover {
-        background: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-color: rgba(255, 255, 255, 0.4);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-      }
-      .glass-button.active {
-        background: rgba(99, 102, 241, 0.4);
-        border-color: rgba(99, 102, 241, 0.6);
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-      }
-      .glass-button:active {
-        transform: translateY(0);
-      }
-      .theme-dot {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-      }
-      .theme-dot:hover {
-        transform: scale(1.15);
-        border-color: rgba(255, 255, 255, 0.6);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      }
-      .theme-dot.active {
-        transform: scale(1.2);
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
-      }
-      .lang-btn {
-        padding: 8px 16px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 600;
-        font-size: 13px;
-      }
-      .lang-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: scale(1.05);
-      }
-      .lang-btn.active {
-        background: rgba(99, 102, 241, 0.5);
-        border-color: rgba(99, 102, 241, 0.7);
-      }
-      .entry-section {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-radius: 16px;
-        padding: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      #startBtn {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.6) 0%, rgba(168, 85, 247, 0.6) 100%);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 16px;
-        padding: 14px 40px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.4s ease;
-        color: white;
-        letter-spacing: 1px;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-      }
-      #startBtn:hover {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.8) 0%, rgba(168, 85, 247, 0.8) 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
-      }
-      .case-btn {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        padding: 10px 18px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-      }
-      .case-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
-      }
-      .case-btn.active {
-        background: rgba(99, 102, 241, 0.5);
-        border-color: rgba(99, 102, 241, 0.6);
-      }
-      .control-pane {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .assistant-pane {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-left: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      select {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        padding: 8px 12px;
-        color: inherit;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-      select:hover {
-        background: rgba(255, 255, 255, 0.15);
-      }
-      select:focus {
-        outline: none;
-        border-color: rgba(99, 102, 241, 0.6);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-      }
-      input, textarea {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 8px;
-        padding: 10px 14px;
-        color: inherit;
-        transition: all 0.3s ease;
-      }
-      input:focus, textarea:focus {
-        outline: none;
-        border-color: rgba(99, 102, 241, 0.5);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        background: rgba(255, 255, 255, 0.1);
-      }
-      .resume-paper {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-      }
-      .panel-title {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-      }
-      #matchBtn, #optimizeBtn, #printBtn {
-        background: rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        padding: 10px 24px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 500;
-      }
-      #matchBtn:hover, #optimizeBtn:hover, #printBtn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-      .entry-copy h1 {
-        text-shadow: 0 2px 20px rgba(99, 102, 241, 0.3);
-      }
-      .entry-screen {
-        background: linear-gradient(135deg, rgba(15, 23, 42, 1) 0%, rgba(30, 41, 59, 1) 50%, rgba(15, 23, 42, 1) 100%);
-      }
-    `;
-    document.head.appendChild(style);
-  }
-  applyGlassStyle();
-
   const cases = {
     job: {
-      zh: { title: "岗位投递版", hint: "重点呈现岗位相关课程、项目实践和可验证技能。" },
-      en: { title: "Job Application", hint: "Highlight position-related skills, projects and measurable outcomes." },
-      keywords: ["HTML", "CSS", "JavaScript", "项目", "实习", "协作", "文档"]
+      zh: { title: "岗位投递版" },
+      en: { title: "Job Application" }
     },
     postgraduate: {
-      zh: { title: "考研复试版", hint: "重点呈现专业基础、核心课程、项目经历和复试表达能力。" },
-      en: { title: "Postgraduate Interview", hint: "Show coursework, research readiness and academic communication." },
-      keywords: ["课程", "专业", "复试", "英语", "科研", "项目", "成绩"]
+      zh: { title: "考研复试版" },
+      en: { title: "Postgraduate Interview" }
     },
     recommendation: {
-      zh: { title: "保研申请版", hint: "重点呈现排名、科研潜力、竞赛获奖和导师方向匹配。" },
-      en: { title: "Recommendation Track", hint: "Show rank, research potential, awards and advisor fit." },
-      keywords: ["排名", "科研", "竞赛", "论文", "项目", "英语", "导师"]
+      zh: { title: "保研申请版" },
+      en: { title: "Recommendation Track" }
     },
     admission: {
-      zh: { title: "升学申请版", hint: "重点呈现学术经历、语言能力、项目作品和申请项目契合度。" },
-      en: { title: "Admission Portfolio", hint: "Show academic work, language skills, projects and program fit." },
-      keywords: ["GPA", "语言", "项目", "作品", "申请", "研究", "经历"]
-    }
-  };
-
-  const appShell = document.querySelector("#appShell");
-  const entryScreen = document.querySelector("#entryScreen");
-  const startBtn = document.querySelector("#startBtn");
-  const entryCaseButtons = Array.from(document.querySelectorAll("[data-entry-case]"));
-  const themeDots = Array.from(document.querySelectorAll("[data-theme-choice]"));
-  const langButtons = Array.from(document.querySelectorAll("[data-lang-choice]"));
-  const entryTemplate = document.querySelector("#entryTemplate");
-
-  const form = document.querySelector("#resumeForm");
-  const caseButtons = Array.from(document.querySelectorAll(".case-btn"));
-  const templateSelect = document.querySelector("#templateSelect");
-  const themeSelect = document.querySelector("#themeSelect");
-  const languageSelect = document.querySelector("#languageSelect");
-  const paper = document.querySelector("#resumePaper");
-  const caseTitle = document.querySelector("#caseTitle");
-  const educationHint = document.querySelector("#educationHint");
-  const skillTags = document.querySelector("#skillTags");
-  const scoreValue = document.querySelector("#scoreValue");
-  const scoreLevel = document.querySelector("#scoreLevel");
-  const scoreTips = document.querySelector("#scoreTips");
-  const targetInput = document.querySelector("#targetInput");
-  const matchBtn = document.querySelector("#matchBtn");
-  const matchResult = document.querySelector("#matchResult");
-  const optimizeBtn = document.querySelector("#optimizeBtn");
-  const optimizeResult = document.querySelector("#optimizeResult");
-  const printBtn = document.querySelector("#printBtn");
-
-  const supportedTemplates = ["modern", "blue", "sidebar", "gray", "classic", "minimal", "timeline", "professional", "compact"];
-  const supportedThemes = ["aurora", "forest", "ember", "violet"];
-
-  const templateLabels = {
-    zh: {
-      modern: "现代通用",
-      blue: "蓝金正式",
-      sidebar: "侧栏信息",
-      gray: "蓝灰团队",
-      classic: "经典单栏",
-      minimal: "极简投递",
-      timeline: "时间线项目",
-      professional: "专业沉稳",
-      compact: "紧凑信息"
-    },
-    en: {
-      modern: "General",
-      blue: "Blue-Gold",
-      sidebar: "Sidebar",
-      gray: "Blue-Gray",
-      classic: "Classic",
-      minimal: "Minimal",
-      timeline: "Timeline",
-      professional: "Professional",
-      compact: "Compact"
-    }
-  };
-
-  const themeLabels = {
-    zh: {
-      aurora: { label: "极光蓝", short: "蓝" },
-      forest: { label: "森林绿", short: "绿" },
-      ember: { label: "琥珀橙", short: "橙" },
-      violet: { label: "学院紫", short: "紫" }
-    },
-    en: {
-      aurora: { label: "Aurora Blue", short: "B" },
-      forest: { label: "Forest Green", short: "G" },
-      ember: { label: "Amber", short: "A" },
-      violet: { label: "Academic Purple", short: "P" }
+      zh: { title: "升学申请版" },
+      en: { title: "Admission Portfolio" }
     }
   };
 
@@ -303,202 +25,426 @@
       entrySections: ["材料场景", "模板与主题", "语言"],
       start: "进入工作台",
       brandTitle: "简历生成与优化工作台",
-      brandSub: "Jekyll 静态网站 · 本地规则建议",
+      brandSub: "Jekyll 静态网站 · 本地多条目编辑",
       privacyTitle: "演示数据",
-      privacyText: "页面示例不使用真实个人信息，所有评分与匹配均在浏览器本地完成。",
+      privacyText: "页面示例不使用真实个人信息。头像仅在当前浏览器本地预览，不会上传到服务器。",
       caseHeading: "选择材料场景",
-      infoHeading: "填写核心信息",
-      fieldLabels: {
-        name: "姓名",
-        title: "定位",
-        email: "邮箱",
-        phone: "电话",
-        school: "学校",
-        major: "专业",
-        summary: "个人简介",
-        project: "项目经历",
-        skills: "技能关键词",
-        awards: "奖项证书"
-      },
+      personalHeading: "个人信息",
+      educationHeading: "教育经历",
+      projectHeading: "项目经历",
+      experienceHeading: "实习 / 校园经历",
+      skillHeading: "技能清单",
+      awardHeading: "奖项 / 证书",
+      addEducation: "新增教育",
+      addProject: "新增项目",
+      addExperience: "新增经历",
+      addSkill: "新增技能",
+      addAward: "新增奖项",
+      preview: "实时预览",
+      toolbarTemplate: "模板",
+      toolbarTheme: "主题",
+      toolbarLanguage: "语言",
+      print: "导出 PDF",
       cases: {
         job: "求职",
         postgraduate: "考研",
         recommendation: "保研",
         admission: "升学"
       },
-      templateLabel: "简历模板",
-      toolbarTemplate: "模板",
-      toolbarTheme: "主题",
-      toolbarLanguage: "语言",
-      preview: "实时预览",
-      print: "导出 PDF",
-      resumeSections: ["个人简介", "教育背景", "项目经历", "技能关键词", "奖项证书"],
-      scoreHeading: "本地规则评分",
-      targetHeading: "本地目标匹配",
-      adviceHeading: "本地优化建议",
-      localNote: "所有评分与匹配均在浏览器本地完成。",
-      targetLabel: "粘贴岗位 JD / 院校要求",
-      match: "运行本地匹配",
-      optimize: "生成优化建议"
+      templates: {
+        modern: "现代通用",
+        blue: "蓝金正式",
+        sidebar: "侧栏信息",
+        gray: "蓝灰团队",
+        classic: "经典单栏",
+        minimal: "极简投递",
+        timeline: "时间线项目",
+        professional: "专业沉稳",
+        compact: "紧凑信息"
+      },
+      themes: {
+        aurora: "极光蓝",
+        forest: "森林绿",
+        ember: "琥珀橙",
+        violet: "学院紫"
+      },
+      personalFields: {
+        name: "姓名",
+        title: "定位",
+        email: "邮箱",
+        phone: "电话",
+        location: "所在地",
+        avatar: "头像上传",
+        summary: "个人简介"
+      },
+      educationFields: {
+        school: "学校",
+        major: "专业",
+        degree: "学位",
+        period: "时间",
+        summary: "亮点说明"
+      },
+      projectFields: {
+        name: "项目名称",
+        role: "角色",
+        period: "时间",
+        summary: "项目说明"
+      },
+      experienceFields: {
+        organization: "组织 / 单位",
+        role: "岗位",
+        period: "时间",
+        summary: "经历说明"
+      },
+      skillFields: {
+        name: "技能名称",
+        level: "掌握程度"
+      },
+      awardFields: {
+        name: "名称",
+        issuer: "颁发方",
+        date: "时间",
+        summary: "说明"
+      },
+      emptyEducation: "暂无教育经历。",
+      emptyProject: "暂无项目经历。",
+      emptyExperience: "暂无实习 / 校园经历。",
+      emptySkill: "暂无技能。",
+      emptyAward: "暂无奖项 / 证书。",
+      emptyEditor: "暂无条目，可点击上方新增。",
+      remove: "删除"
     },
     en: {
       entryTitle: "Resume Builder Workspace",
-      entryLead: "Choose a scenario, visual template, theme color and interface language before entering the builder. The static site uses local rules and does not pretend to be a real LLM.",
+      entryLead: "Choose a scenario, visual template, theme color and interface language before entering the builder. The static site focuses on local editing and print output.",
       entrySections: ["Scenario", "Template & Theme", "Language"],
       start: "Enter Workspace",
       brandTitle: "Resume Builder Workspace",
-      brandSub: "Jekyll static site · local rule advice",
+      brandSub: "Jekyll static site · local multi-entry editing",
       privacyTitle: "Demo Data",
-      privacyText: "The sample page uses neutral demo data. Scores and matching run locally in the browser.",
+      privacyText: "This page uses demo data. Avatar preview stays in the current browser only.",
       caseHeading: "Choose Scenario",
-      infoHeading: "Core Information",
-      fieldLabels: {
-        name: "Name",
-        title: "Target",
-        email: "Email",
-        phone: "Phone",
-        school: "School",
-        major: "Major",
-        summary: "Summary",
-        project: "Project Experience",
-        skills: "Skill Keywords",
-        awards: "Awards"
-      },
+      personalHeading: "Personal Info",
+      educationHeading: "Education",
+      projectHeading: "Projects",
+      experienceHeading: "Experience",
+      skillHeading: "Skills",
+      awardHeading: "Awards",
+      addEducation: "Add Education",
+      addProject: "Add Project",
+      addExperience: "Add Experience",
+      addSkill: "Add Skill",
+      addAward: "Add Award",
+      preview: "Live Preview",
+      toolbarTemplate: "Template",
+      toolbarTheme: "Theme",
+      toolbarLanguage: "Language",
+      print: "Export PDF",
       cases: {
         job: "Job",
         postgraduate: "Interview",
         recommendation: "Recommendation",
         admission: "Admission"
       },
-      templateLabel: "Resume Template",
-      toolbarTemplate: "Template",
-      toolbarTheme: "Theme",
-      toolbarLanguage: "Language",
-      preview: "Live Preview",
-      print: "Export PDF",
-      resumeSections: ["Summary", "Education", "Project Experience", "Skill Keywords", "Awards"],
-      scoreHeading: "Local Rule Score",
-      targetHeading: "Local Target Match",
-      adviceHeading: "Local Advice",
-      localNote: "Scores and matching run locally in the browser.",
-      targetLabel: "Paste job JD / program requirements",
-      match: "Run Local Match",
-      optimize: "Generate Advice"
+      templates: {
+        modern: "General",
+        blue: "Blue-Gold",
+        sidebar: "Sidebar",
+        gray: "Blue-Gray",
+        classic: "Classic",
+        minimal: "Minimal",
+        timeline: "Timeline",
+        professional: "Professional",
+        compact: "Compact"
+      },
+      themes: {
+        aurora: "Aurora Blue",
+        forest: "Forest Green",
+        ember: "Amber",
+        violet: "Academic Purple"
+      },
+      personalFields: {
+        name: "Name",
+        title: "Target",
+        email: "Email",
+        phone: "Phone",
+        location: "Location",
+        avatar: "Avatar Upload",
+        summary: "Summary"
+      },
+      educationFields: {
+        school: "School",
+        major: "Major",
+        degree: "Degree",
+        period: "Period",
+        summary: "Highlights"
+      },
+      projectFields: {
+        name: "Project",
+        role: "Role",
+        period: "Period",
+        summary: "Description"
+      },
+      experienceFields: {
+        organization: "Organization",
+        role: "Role",
+        period: "Period",
+        summary: "Description"
+      },
+      skillFields: {
+        name: "Skill",
+        level: "Level"
+      },
+      awardFields: {
+        name: "Name",
+        issuer: "Issuer",
+        date: "Date",
+        summary: "Description"
+      },
+      emptyEducation: "No education entries yet.",
+      emptyProject: "No project entries yet.",
+      emptyExperience: "No experience entries yet.",
+      emptySkill: "No skills yet.",
+      emptyAward: "No awards yet.",
+      emptyEditor: "No entries yet. Use the add button above.",
+      remove: "Delete"
     }
   };
 
-  const sampleDefaults = {
-    zh: {
+  const state = {
+    activeCase: "job",
+    activeLang: "zh",
+    activeTheme: "aurora",
+    activeTemplate: "modern",
+    avatarUrl: "",
+    personal: {
       name: "示例学生",
       title: "计算机方向申请者 / Web 项目实践者",
       email: "demo@example.com",
       phone: "000-0000-0000",
-      school: "示例大学",
-      major: "计算机类专业",
-      summary: "具备 Web 前端、静态网站构建和项目文档整理基础，能够完成从需求分析、界面设计、交互实现到运行验证的完整实践流程。关注材料结构化表达、用户体验、隐私保护和可复现交付。",
-      project: "Jekyll 简历生成与优化工作台：基于静态网站技术重新实现简历生成器，完成场景选择、信息编辑、实时预览、模板切换、本地材料评分和目标匹配等模块，实现无需后端即可运行和部署的课程项目版本。",
-      skills: "HTML, CSS, JavaScript, Jekyll, Git, 信息架构, 交互设计, 文档写作",
-      awards: "创新实验课程项目实践、Web开发综合训练",
-      target: "前端开发实习生，要求熟悉 HTML、CSS、JavaScript，了解 Vue 或静态网站开发，有项目实践、文档能力和良好的沟通协作能力。"
+      location: "上海",
+      summary:
+        "具备 Web 前端、静态网站构建和项目文档整理基础，能够完成从需求分析、界面设计、交互实现到运行验证的完整实践流程。关注材料结构化表达、用户体验、隐私保护和可复现交付。"
     },
-    en: {
-      name: "Demo Student",
-      title: "Computer Science Applicant / Web Project Builder",
-      email: "demo@example.com",
-      phone: "000-0000-0000",
-      school: "Demo University",
-      major: "Computer Science",
-      summary: "Experienced in web front-end development, static site construction and project documentation. Able to complete requirement analysis, interface design, interaction implementation and reproducible delivery.",
-      project: "Jekyll Resume Builder Workspace: rebuilt a resume generator as a static website, including scenario selection, information editing, live preview, template switching, local scoring and target matching without a backend service.",
-      skills: "HTML, CSS, JavaScript, Jekyll, Git, Information Architecture, Interaction Design, Documentation",
-      awards: "Innovation experiment course project, Web development training",
-      target: "Front-end intern role requiring HTML, CSS, JavaScript, Vue or static site experience, project practice, documentation ability and clear collaboration."
+    educations: [
+      {
+        id: nextId(),
+        school: "示例大学",
+        major: "计算机类专业",
+        degree: "本科",
+        period: "2021.09 - 2025.06",
+        summary: "核心课程覆盖数据结构、操作系统、数据库与软件工程。"
+      }
+    ],
+    projects: [
+      {
+        id: nextId(),
+        name: "Jekyll 简历生成与优化工作台",
+        role: "项目改造",
+        period: "2026.06",
+        summary:
+          "基于静态网站技术完成简历工作台重构，支持多条教育、项目、经历、技能和奖项编辑，保留模板切换与 PDF 打印。"
+      }
+    ],
+    experiences: [
+      {
+        id: nextId(),
+        organization: "创新实验课程项目组",
+        role: "前端开发",
+        period: "2024.03 - 2024.06",
+        summary: "负责工作台界面实现、表单交互与静态部署，输出运行说明和功能复现文档。"
+      }
+    ],
+    skills: [
+      { id: nextId(), name: "HTML / CSS / JavaScript", level: "熟练" },
+      { id: nextId(), name: "Jekyll", level: "熟练" },
+      { id: nextId(), name: "文档写作", level: "良好" }
+    ],
+    awards: [
+      {
+        id: nextId(),
+        name: "创新实验课程项目实践",
+        issuer: "课程项目组",
+        date: "2026",
+        summary: "完成静态站点升级、在线部署与本地交互改造。"
+      }
+    ]
+  };
+
+  const appShell = document.querySelector("#appShell");
+  const entryScreen = document.querySelector("#entryScreen");
+  const startBtn = document.querySelector("#startBtn");
+  const entryCaseButtons = Array.from(document.querySelectorAll("[data-entry-case]"));
+  const caseButtons = Array.from(document.querySelectorAll("[data-case]"));
+  const themeDots = Array.from(document.querySelectorAll("[data-theme-choice]"));
+  const langButtons = Array.from(document.querySelectorAll("[data-lang-choice]"));
+  const entryTemplate = document.querySelector("#entryTemplate");
+  const templateSelect = document.querySelector("#templateSelect");
+  const themeSelect = document.querySelector("#themeSelect");
+  const languageSelect = document.querySelector("#languageSelect");
+  const printBtn = document.querySelector("#printBtn");
+
+  const personalInputs = {
+    name: document.querySelector("#nameInput"),
+    title: document.querySelector("#titleInput"),
+    email: document.querySelector("#emailInput"),
+    phone: document.querySelector("#phoneInput"),
+    location: document.querySelector("#locationInput"),
+    summary: document.querySelector("#summaryInput"),
+    avatar: document.querySelector("#avatarInput")
+  };
+
+  const previewNodes = {
+    name: document.querySelector("#previewName"),
+    title: document.querySelector("#previewTitle"),
+    email: document.querySelector("#previewEmail"),
+    phone: document.querySelector("#previewPhone"),
+    location: document.querySelector("#previewLocation"),
+    summary: document.querySelector("#previewSummary"),
+    avatar: document.querySelector("#avatarPreview"),
+    educations: document.querySelector("#previewEducations"),
+    projects: document.querySelector("#previewProjects"),
+    experiences: document.querySelector("#previewExperiences"),
+    skills: document.querySelector("#previewSkills"),
+    awards: document.querySelector("#previewAwards"),
+    caseTitle: document.querySelector("#caseTitle"),
+    paper: document.querySelector("#resumePaper")
+  };
+
+  const listMounts = {
+    educations: document.querySelector("#educationList"),
+    projects: document.querySelector("#projectList"),
+    experiences: document.querySelector("#experienceList"),
+    skills: document.querySelector("#skillList"),
+    awards: document.querySelector("#awardList")
+  };
+
+  const addButtons = {
+    educations: document.querySelector("#addEducationBtn"),
+    projects: document.querySelector("#addProjectBtn"),
+    experiences: document.querySelector("#addExperienceBtn"),
+    skills: document.querySelector("#addSkillBtn"),
+    awards: document.querySelector("#addAwardBtn")
+  };
+
+  const sectionConfig = {
+    educations: {
+      title: (item) => item.school || ui().educationHeading,
+      fields: ["school", "major", "degree", "period", "summary"]
+    },
+    projects: {
+      title: (item) => item.name || ui().projectHeading,
+      fields: ["name", "role", "period", "summary"]
+    },
+    experiences: {
+      title: (item) => item.organization || ui().experienceHeading,
+      fields: ["organization", "role", "period", "summary"]
+    },
+    skills: {
+      title: (item) => item.name || ui().skillHeading,
+      fields: ["name", "level"]
+    },
+    awards: {
+      title: (item) => item.name || ui().awardHeading,
+      fields: ["name", "issuer", "date", "summary"]
     }
   };
 
-  let activeCase = "job";
-  let activeLang = "zh";
-  let activeTheme = "aurora";
-
-  function getData() {
-    const data = new FormData(form);
-    return Object.fromEntries(data.entries());
+  function nextId() {
+    return `item-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
   }
 
-  function splitKeywords(value) {
-    return String(value || "")
-      .split(/[,，、\s]+/)
-      .map((item) => item.trim())
-      .filter(Boolean);
+  function ui() {
+    return uiText[state.activeLang];
+  }
+
+  function emptyEducation() {
+    return { id: nextId(), school: "", major: "", degree: "", period: "", summary: "" };
+  }
+
+  function emptyProject() {
+    return { id: nextId(), name: "", role: "", period: "", summary: "" };
+  }
+
+  function emptyExperience() {
+    return { id: nextId(), organization: "", role: "", period: "", summary: "" };
+  }
+
+  function emptySkill() {
+    return { id: nextId(), name: "", level: "" };
+  }
+
+  function emptyAward() {
+    return { id: nextId(), name: "", issuer: "", date: "", summary: "" };
   }
 
   function setTheme(theme) {
-    activeTheme = supportedThemes.includes(theme) ? theme : "aurora";
-    document.body.dataset.theme = activeTheme;
+    state.activeTheme = ["aurora", "forest", "ember", "violet"].includes(theme) ? theme : "aurora";
+    document.body.dataset.theme = state.activeTheme;
     themeDots.forEach((button) => {
-      button.classList.toggle("active", button.dataset.themeChoice === activeTheme);
+      button.classList.toggle("active", button.dataset.themeChoice === state.activeTheme);
     });
-    if (themeSelect) themeSelect.value = activeTheme;
+    themeSelect.value = state.activeTheme;
   }
 
-  function setText(selector, value) {
-    const node = document.querySelector(selector);
-    if (node) node.textContent = value;
-  }
-
-  function setLabelText(label, value) {
-    if (!label) return;
-    const textNode = Array.from(label.childNodes).find((node) => (
-      node.nodeType === Node.TEXT_NODE && node.textContent.trim()
-    ));
-    if (textNode) textNode.textContent = `\n            ${value}\n            `;
-  }
-
-  function setOptionLabels(select, labels) {
-    if (!select) return;
-    Array.from(select.options).forEach((option) => {
-      if (labels[option.value]) option.textContent = labels[option.value];
+  function setLanguage(lang) {
+    state.activeLang = lang === "en" ? "en" : "zh";
+    document.body.dataset.lang = state.activeLang;
+    languageSelect.value = state.activeLang;
+    langButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.langChoice === state.activeLang);
     });
+    applyUiLanguage();
+    renderEditor();
+    renderPreview();
   }
 
-  function isSampleValue(key, value) {
-    return value === sampleDefaults.zh[key] || value === sampleDefaults.en[key];
+  function setTemplate(template) {
+    const supported = ["modern", "blue", "sidebar", "gray", "classic", "minimal", "timeline", "professional", "compact"];
+    state.activeTemplate = supported.includes(template) ? template : "modern";
+    templateSelect.value = state.activeTemplate;
+    entryTemplate.value = state.activeTemplate;
+    previewNodes.paper.className = `resume-paper template-${state.activeTemplate}`;
   }
 
-  function syncSampleFieldsForLanguage(lang) {
-    if (!form) return;
-    const keys = ["name", "title", "email", "phone", "school", "major", "summary", "project", "skills", "awards"];
-    const data = getData();
-    const canSyncForm = keys.every((key) => isSampleValue(key, data[key]));
-    if (canSyncForm) {
-      keys.forEach((key) => {
-        form.elements[key].value = sampleDefaults[lang][key];
-      });
-    }
-
-    if (targetInput && isSampleValue("target", targetInput.value)) {
-      targetInput.value = sampleDefaults[lang].target;
-    }
+  function setCase(nextCase) {
+    state.activeCase = cases[nextCase] ? nextCase : "job";
+    caseButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.case === state.activeCase);
+    });
+    entryCaseButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.entryCase === state.activeCase);
+    });
+    renderPreview();
   }
 
   function applyUiLanguage() {
-    const text = uiText[activeLang];
-    const templates = templateLabels[activeLang];
-    const themes = themeLabels[activeLang];
-
-    document.documentElement.lang = activeLang === "en" ? "en" : "zh-CN";
-    setText(".entry-copy h1", text.entryTitle);
-    setText(".entry-copy p", text.entryLead);
+    const text = ui();
+    document.documentElement.lang = state.activeLang === "en" ? "en" : "zh-CN";
+    document.querySelector(".entry-copy h1").textContent = text.entryTitle;
+    document.querySelector(".entry-copy p").textContent = text.entryLead;
     document.querySelectorAll(".entry-section h2").forEach((node, index) => {
       node.textContent = text.entrySections[index] || node.textContent;
     });
-    setLabelText(entryTemplate && entryTemplate.closest("label"), text.templateLabel);
-    setText("#startBtn", text.start);
-    setText(".brand h1", text.brandTitle);
-    setText(".brand p", text.brandSub);
-    setText(".privacy-note strong", text.privacyTitle);
-    setText(".privacy-note span", text.privacyText);
-
+    document.querySelector(".brand h1").textContent = text.brandTitle;
+    document.querySelector(".brand p").textContent = text.brandSub;
+    document.querySelector(".privacy-note strong").textContent = text.privacyTitle;
+    document.querySelector(".privacy-note span").textContent = text.privacyText;
+    document.querySelectorAll(".control-pane .panel-title h2")[0].textContent = text.caseHeading;
+    document.querySelectorAll(".control-pane .panel-title h2")[1].textContent = text.personalHeading;
+    document.querySelectorAll(".control-pane .panel-title h2")[2].textContent = text.educationHeading;
+    document.querySelectorAll(".control-pane .panel-title h2")[3].textContent = text.projectHeading;
+    document.querySelectorAll(".control-pane .panel-title h2")[4].textContent = text.experienceHeading;
+    document.querySelectorAll(".control-pane .panel-title h2")[5].textContent = text.skillHeading;
+    document.querySelectorAll(".control-pane .panel-title h2")[6].textContent = text.awardHeading;
+    document.querySelector(".eyebrow").textContent = text.preview;
+    printBtn.textContent = text.print;
+    startBtn.textContent = text.start;
+    addButtons.educations.textContent = text.addEducation;
+    addButtons.projects.textContent = text.addProject;
+    addButtons.experiences.textContent = text.addExperience;
+    addButtons.skills.textContent = text.addSkill;
+    addButtons.awards.textContent = text.addAward;
     entryCaseButtons.forEach((button) => {
       button.textContent = text.cases[button.dataset.entryCase];
     });
@@ -506,279 +452,321 @@
       button.textContent = text.cases[button.dataset.case];
     });
 
-    const controlTitles = document.querySelectorAll(".control-pane .panel-title h2");
-    if (controlTitles[0]) controlTitles[0].textContent = text.caseHeading;
-    if (controlTitles[1]) controlTitles[1].textContent = text.infoHeading;
+    setOptionText(entryTemplate, text.templates);
+    setOptionText(templateSelect, text.templates);
+    setOptionText(themeSelect, text.themes);
 
-    Object.keys(text.fieldLabels).forEach((key) => {
-      setLabelText(form.elements[key].closest("label"), text.fieldLabels[key]);
-    });
-
-    setText(".eyebrow", text.preview);
-    setLabelText(templateSelect.closest("label"), text.toolbarTemplate);
-    setLabelText(themeSelect.closest("label"), text.toolbarTheme);
-    setLabelText(languageSelect.closest("label"), text.toolbarLanguage);
-    setText("#printBtn", text.print);
-
-    setOptionLabels(entryTemplate, templates);
-    setOptionLabels(templateSelect, templates);
-    setOptionLabels(themeSelect, Object.fromEntries(
-      supportedThemes.map((theme) => [theme, themes[theme].label])
-    ));
-    themeDots.forEach((button) => {
-      const theme = button.dataset.themeChoice;
-      button.textContent = themes[theme].short;
-      button.title = themes[theme].label;
-    });
-
-    document.querySelectorAll(".resume-paper section h3").forEach((node, index) => {
-      node.textContent = text.resumeSections[index] || node.textContent;
-    });
-
-    const assistantTitles = document.querySelectorAll(".assistant-pane .panel-title h2");
-    if (assistantTitles[0]) assistantTitles[0].textContent = text.scoreHeading;
-    if (assistantTitles[1]) assistantTitles[1].textContent = text.targetHeading;
-    if (assistantTitles[2]) assistantTitles[2].textContent = text.adviceHeading;
-    setText(".local-note", text.localNote);
-    setLabelText(targetInput.closest("label"), text.targetLabel);
-    setText("#matchBtn", text.match);
-    setText("#optimizeBtn", text.optimize);
-  }
-
-  function setLanguage(lang) {
-    activeLang = lang === "en" ? "en" : "zh";
-    document.body.dataset.lang = activeLang;
-    syncSampleFieldsForLanguage(activeLang);
-    applyUiLanguage();
-    langButtons.forEach((button) => {
-      button.classList.toggle("active", button.dataset.langChoice === activeLang);
-    });
-    if (languageSelect) languageSelect.value = activeLang;
-    renderResume();
-    if (matchResult.textContent.trim()) analyzeMatch();
-    if (optimizeResult.textContent.trim()) generateAdvice();
-  }
-
-  function applyTemplate(template) {
-    const next = supportedTemplates.includes(template) ? template : "modern";
-    paper.className = `resume-paper template-${next}`;
-    templateSelect.value = next;
-    entryTemplate.value = next;
-  }
-
-  function renderResume() {
-    const data = getData();
-    document.querySelectorAll("[data-bind]").forEach((node) => {
-      const key = node.getAttribute("data-bind");
-      node.textContent = data[key] || "";
-    });
-
-    skillTags.innerHTML = "";
-    splitKeywords(data.skills).forEach((skill) => {
-      const tag = document.createElement("span");
-      tag.textContent = skill;
-      skillTags.appendChild(tag);
-    });
-
-    caseTitle.textContent = cases[activeCase][activeLang].title;
-    educationHint.textContent = cases[activeCase][activeLang].hint;
-    updateScore();
-  }
-
-  function scoreResume() {
-    const data = getData();
-    const tips = [];
-    let score = 0;
-
-    if (data.name) score += 8;
-    else tips.push(activeLang === "zh" ? "建议补充姓名。" : "Add a candidate name.");
-
-    if (data.title && data.title.length >= 8) score += 10;
-    else tips.push(activeLang === "zh" ? "定位标题建议写清目标方向。" : "Clarify the target direction in the title.");
-
-    if (data.email && data.phone) score += 10;
-    else tips.push(activeLang === "zh" ? "联系方式需要完整，便于材料投递。" : "Contact information should be complete.");
-
-    if (data.summary && data.summary.length >= 60) score += 18;
-    else tips.push(activeLang === "zh" ? "个人简介建议达到 60 字以上，并写出能力、经历和目标。" : "Expand the summary with strengths, experience and goals.");
-
-    if (data.school && data.major) score += 14;
-    else tips.push(activeLang === "zh" ? "教育背景需要包含学校和专业。" : "Include school and major.");
-
-    if (data.project && data.project.length >= 80) score += 22;
-    else tips.push(activeLang === "zh" ? "项目经历建议补充背景、方法、角色和结果。" : "Describe project context, method, role and result.");
-
-    const skills = splitKeywords(data.skills);
-    if (skills.length >= 6) score += 12;
-    else tips.push(activeLang === "zh" ? "技能关键词建议不少于 6 个。" : "Use at least six skill keywords.");
-
-    if (data.awards) score += 6;
-    else tips.push(activeLang === "zh" ? "可补充奖项、证书或课程成果作为佐证。" : "Add awards or certificates as evidence.");
-
-    const text = Object.values(data).join(" ");
-    if (/\d+|%|人|项|次|篇|个/.test(text)) score += 8;
-    else tips.push(activeLang === "zh" ? "建议加入数字化结果，如模块数量、比例或项目规模。" : "Add measurable results such as counts or percentages.");
-
-    score = Math.min(score, 100);
-    const levelZh = score >= 85 ? "优秀" : score >= 70 ? "良好" : score >= 55 ? "基本完整" : "待完善";
-    const levelEn = score >= 85 ? "Strong" : score >= 70 ? "Good" : score >= 55 ? "Needs Proof" : "Needs Work";
-    return { score, level: activeLang === "zh" ? levelZh : levelEn, tips };
-  }
-
-  function updateScore() {
-    const result = scoreResume();
-    scoreValue.textContent = result.score;
-    scoreLevel.textContent = result.level;
-    scoreTips.innerHTML = "";
-    const defaultTip = activeLang === "zh"
-      ? "材料结构完整，可继续根据目标补充关键词和量化成果。"
-      : "Structure is complete. Add more measurable outcomes and target keywords.";
-    const tips = result.tips.length ? result.tips : [defaultTip];
-    tips.slice(0, 5).forEach((tip) => {
-      const li = document.createElement("li");
-      li.textContent = tip;
-      scoreTips.appendChild(li);
+    const personalLabels = document.querySelectorAll("#nameInput, #titleInput, #emailInput, #phoneInput, #locationInput, #avatarInput, #summaryInput");
+    personalLabels.forEach((input) => {
+      const label = input.closest("label");
+      if (!label) return;
+      const mapping = {
+        nameInput: text.personalFields.name,
+        titleInput: text.personalFields.title,
+        emailInput: text.personalFields.email,
+        phoneInput: text.personalFields.phone,
+        locationInput: text.personalFields.location,
+        avatarInput: text.personalFields.avatar,
+        summaryInput: text.personalFields.summary
+      };
+      replaceLabelText(label, mapping[input.id]);
     });
   }
 
-  function changeCase(nextCase) {
-    activeCase = cases[nextCase] ? nextCase : "job";
-    caseButtons.forEach((button) => {
-      button.classList.toggle("active", button.dataset.case === activeCase);
-    });
-    entryCaseButtons.forEach((button) => {
-      button.classList.toggle("active", button.dataset.entryCase === activeCase);
-    });
-    renderResume();
+  function replaceLabelText(label, value) {
+    const textNode = Array.from(label.childNodes).find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    if (textNode) {
+      textNode.textContent = `\n            ${value}\n            `;
+    }
   }
 
-  function analyzeMatch() {
-    const data = getData();
-    const target = targetInput.value || "";
-    const resumeText = Object.values(data).join(" ");
-    const targetWords = splitKeywords(target.replace(/[，。；、]/g, " "));
-    const caseWords = cases[activeCase].keywords;
-    const allWords = Array.from(new Set(targetWords.concat(caseWords))).filter((word) => word.length >= 2);
-    const matched = allWords.filter((word) => resumeText.toLowerCase().includes(word.toLowerCase()));
-    const missing = allWords.filter((word) => !matched.includes(word)).slice(0, 8);
-    const percent = allWords.length ? Math.round((matched.length / allWords.length) * 100) : 0;
+  function setOptionText(select, labels) {
+    Array.from(select.options).forEach((option) => {
+      if (labels[option.value]) {
+        option.textContent = labels[option.value];
+      }
+    });
+  }
 
-    if (activeLang === "zh") {
-      matchResult.textContent = [
-        `匹配度：${percent}/100`,
-        `已覆盖关键词：${matched.slice(0, 10).join("、") || "暂无明显覆盖"}`,
-        `建议补充关键词：${missing.join("、") || "暂无明显缺口"}`,
-        "说明：这是本地关键词匹配结果。"
-      ].join("\n");
+  function renderEditor() {
+    renderSectionList("educations", ui().educationFields);
+    renderSectionList("projects", ui().projectFields);
+    renderSectionList("experiences", ui().experienceFields);
+    renderSectionList("skills", ui().skillFields);
+    renderSectionList("awards", ui().awardFields);
+  }
+
+  function renderSectionList(sectionName, labels) {
+    const mount = listMounts[sectionName];
+    const items = state[sectionName];
+    mount.innerHTML = "";
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "entry-empty";
+      empty.textContent = ui().emptyEditor;
+      mount.appendChild(empty);
+      return;
+    }
+
+    items.forEach((item, index) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "entry-item";
+      wrapper.innerHTML = `
+        <div class="entry-item-head">
+          <strong>${escapeHtml(sectionConfig[sectionName].title(item))}</strong>
+          <button class="entry-item-remove" type="button" data-section="${sectionName}" data-id="${item.id}" aria-label="${ui().remove}">&times;</button>
+        </div>
+        <div class="entry-item-grid"></div>
+      `;
+
+      const grid = wrapper.querySelector(".entry-item-grid");
+      sectionConfig[sectionName].fields.forEach((field) => {
+        const label = document.createElement("label");
+        if (field === "summary") {
+          label.className = "wide";
+        }
+        label.innerHTML = `${labels[field]}
+          ${field === "summary"
+            ? `<textarea rows="4" data-section="${sectionName}" data-id="${item.id}" data-field="${field}">${escapeHtml(item[field] || "")}</textarea>`
+            : `<input value="${escapeAttribute(item[field] || "")}" data-section="${sectionName}" data-id="${item.id}" data-field="${field}">`
+          }`;
+        grid.appendChild(label);
+      });
+
+      mount.appendChild(wrapper);
+    });
+  }
+
+  function renderPreview() {
+    previewNodes.name.textContent = state.personal.name || "";
+    previewNodes.title.textContent = state.personal.title || "";
+    previewNodes.email.textContent = state.personal.email || "";
+    previewNodes.phone.textContent = state.personal.phone || "";
+    previewNodes.location.textContent = state.personal.location || "";
+    previewNodes.summary.textContent = state.personal.summary || "";
+    previewNodes.caseTitle.textContent = cases[state.activeCase][state.activeLang].title;
+
+    if (state.avatarUrl) {
+      previewNodes.avatar.style.backgroundImage = `url("${state.avatarUrl}")`;
+      previewNodes.avatar.classList.remove("is-hidden");
     } else {
-      matchResult.textContent = [
-        `Match score: ${percent}/100`,
-        `Covered terms: ${matched.slice(0, 10).join(", ") || "No obvious coverage"}`,
-        `Missing terms: ${missing.join(", ") || "No obvious gaps"}`,
-        "Note: this is a local keyword matcher."
-      ].join("\n");
+      previewNodes.avatar.style.backgroundImage = "";
+      previewNodes.avatar.classList.add("is-hidden");
+    }
+
+    renderPreviewCards(previewNodes.educations, state.educations, ui().emptyEducation, (item) => `
+      <strong>${escapeHtml(item.school || "")}</strong>
+      <small>${escapeHtml([item.degree, item.major, item.period].filter(Boolean).join(" · "))}</small>
+      <div>${escapeHtml(item.summary || "")}</div>
+    `);
+    renderPreviewCards(previewNodes.projects, state.projects, ui().emptyProject, (item) => `
+      <strong>${escapeHtml(item.name || "")}</strong>
+      <small>${escapeHtml([item.role, item.period].filter(Boolean).join(" · "))}</small>
+      <div>${escapeHtml(item.summary || "")}</div>
+    `);
+    renderPreviewCards(previewNodes.experiences, state.experiences, ui().emptyExperience, (item) => `
+      <strong>${escapeHtml(item.organization || "")}</strong>
+      <small>${escapeHtml([item.role, item.period].filter(Boolean).join(" · "))}</small>
+      <div>${escapeHtml(item.summary || "")}</div>
+    `);
+    renderPreviewCards(previewNodes.awards, state.awards, ui().emptyAward, (item) => `
+      <strong>${escapeHtml(item.name || "")}</strong>
+      <small>${escapeHtml([item.issuer, item.date].filter(Boolean).join(" · "))}</small>
+      <div>${escapeHtml(item.summary || "")}</div>
+    `);
+
+    previewNodes.skills.innerHTML = "";
+    if (state.skills.length === 0) {
+      previewNodes.skills.textContent = ui().emptySkill;
+    } else {
+      state.skills.forEach((item) => {
+        const tag = document.createElement("span");
+        tag.textContent = [item.name, item.level].filter(Boolean).join(" · ");
+        previewNodes.skills.appendChild(tag);
+      });
     }
   }
 
-  function generateAdvice() {
-    const data = getData();
-    const tips = [];
-    if (!/[。；;]/.test(data.project || "")) {
-      tips.push(activeLang === "zh"
-        ? "项目经历可以拆成“背景-职责-方法-结果”四个短句。"
-        : "Split the project block into context, role, method and result.");
+  function renderPreviewCards(mount, items, emptyText, template) {
+    mount.innerHTML = "";
+    if (!items.length) {
+      mount.textContent = emptyText;
+      return;
     }
-    if (!/\d+|%/.test(data.project || "")) {
-      tips.push(activeLang === "zh"
-        ? "项目成果建议加入数字，如模块数量、用户规模或效率提升。"
-        : "Add measurable numbers such as modules, scale or efficiency gain.");
-    }
-    if ((data.summary || "").length > 160) {
-      tips.push(activeLang === "zh"
-        ? "个人简介略长，建议压缩到 80-120 字。"
-        : "The summary is long. Compress it to 80-120 words/characters.");
-    } else {
-      tips.push(activeLang === "zh"
-        ? "个人简介长度合适，可继续加入目标关键词。"
-        : "The summary length is fine. Add more target keywords.");
-    }
-    tips.push(activeLang === "zh"
-      ? `当前场景为“${cases[activeCase].zh.title}”，建议优先突出：${cases[activeCase].keywords.join("、")}。`
-      : `Current mode: ${cases[activeCase].en.title}. Prioritize: ${cases[activeCase].keywords.join(", ")}.`);
-    optimizeResult.textContent = tips.map((tip, index) => `${index + 1}. ${tip}`).join("\n");
+    items.forEach((item) => {
+      const card = document.createElement("article");
+      card.className = "preview-card";
+      card.innerHTML = template(item);
+      mount.appendChild(card);
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
+  function escapeAttribute(value) {
+    return escapeHtml(value).replaceAll('"', "&quot;");
   }
 
   function enterWorkspace() {
     entryScreen.classList.add("is-hidden");
     appShell.classList.remove("is-hidden");
-    changeCase(activeCase);
-    applyTemplate(entryTemplate.value);
-    setTheme(activeTheme);
-    setLanguage(activeLang);
-    analyzeMatch();
-    generateAdvice();
+    setCase(state.activeCase);
+    setTheme(state.activeTheme);
+    setTemplate(state.activeTemplate);
+    setLanguage(state.activeLang);
+    renderEditor();
+    renderPreview();
   }
 
-  function initGlassClasses() {
-    entryCaseButtons.forEach((button) => button.classList.add("glass-button"));
-    caseButtons.forEach((button) => button.classList.add("case-btn"));
-    themeDots.forEach((button) => button.classList.add("theme-dot"));
-    langButtons.forEach((button) => button.classList.add("lang-btn"));
-    document.querySelectorAll(".entry-section").forEach((section) => section.classList.add("entry-section"));
-    document.querySelectorAll(".control-pane").forEach((pane) => pane.classList.add("control-pane"));
-    document.querySelectorAll(".assistant-pane").forEach((pane) => pane.classList.add("assistant-pane"));
-    document.querySelectorAll(".panel-title").forEach((title) => title.classList.add("panel-title"));
-    document.querySelectorAll("select").forEach((select) => {
-      select.style.background = "rgba(255, 255, 255, 0.1)";
-      select.style.backdropFilter = "blur(8px)";
-      select.style.border = "1px solid rgba(255, 255, 255, 0.2)";
-      select.style.borderRadius = "8px";
+  function bindEvents() {
+    entryCaseButtons.forEach((button) => {
+      button.addEventListener("click", () => setCase(button.dataset.entryCase));
     });
-    document.querySelectorAll("input, textarea").forEach((input) => {
-      input.style.background = "rgba(255, 255, 255, 0.08)";
-      input.style.backdropFilter = "blur(8px)";
-      input.style.border = "1px solid rgba(255, 255, 255, 0.15)";
-      input.style.borderRadius = "8px";
+    caseButtons.forEach((button) => {
+      button.addEventListener("click", () => setCase(button.dataset.case));
+    });
+    themeDots.forEach((button) => {
+      button.addEventListener("click", () => setTheme(button.dataset.themeChoice));
+    });
+    langButtons.forEach((button) => {
+      button.addEventListener("click", () => setLanguage(button.dataset.langChoice));
+    });
+
+    entryTemplate.addEventListener("change", () => setTemplate(entryTemplate.value));
+    templateSelect.addEventListener("change", () => setTemplate(templateSelect.value));
+    themeSelect.addEventListener("change", () => setTheme(themeSelect.value));
+    languageSelect.addEventListener("change", () => setLanguage(languageSelect.value));
+    startBtn.addEventListener("click", enterWorkspace);
+    printBtn.addEventListener("click", () => window.print());
+
+    Object.entries(personalInputs).forEach(([key, input]) => {
+      if (key === "avatar") {
+        input.addEventListener("change", onAvatarChange);
+        return;
+      }
+      input.addEventListener("input", () => {
+        state.personal[key] = input.value;
+        renderPreview();
+      });
+    });
+
+    listMounts.educations.addEventListener("input", onSectionInput);
+    listMounts.projects.addEventListener("input", onSectionInput);
+    listMounts.experiences.addEventListener("input", onSectionInput);
+    listMounts.skills.addEventListener("input", onSectionInput);
+    listMounts.awards.addEventListener("input", onSectionInput);
+
+    Object.values(listMounts).forEach((mount) => {
+      mount.addEventListener("click", onRemoveEntry);
+    });
+
+    addButtons.educations.addEventListener("click", () => {
+      state.educations.push(emptyEducation());
+      renderEditor();
+      renderPreview();
+    });
+    addButtons.projects.addEventListener("click", () => {
+      state.projects.push(emptyProject());
+      renderEditor();
+      renderPreview();
+    });
+    addButtons.experiences.addEventListener("click", () => {
+      state.experiences.push(emptyExperience());
+      renderEditor();
+      renderPreview();
+    });
+    addButtons.skills.addEventListener("click", () => {
+      state.skills.push(emptySkill());
+      renderEditor();
+      renderPreview();
+    });
+    addButtons.awards.addEventListener("click", () => {
+      state.awards.push(emptyAward());
+      renderEditor();
+      renderPreview();
     });
   }
 
-  initGlassClasses();
-
-  form.addEventListener("input", renderResume);
-  caseButtons.forEach((button) => {
-    button.addEventListener("click", () => changeCase(button.dataset.case));
-  });
-  entryCaseButtons.forEach((button) => {
-    button.addEventListener("click", () => changeCase(button.dataset.entryCase));
-  });
-  themeDots.forEach((button) => {
-    button.addEventListener("click", () => setTheme(button.dataset.themeChoice));
-  });
-  langButtons.forEach((button) => {
-    button.addEventListener("click", () => setLanguage(button.dataset.langChoice));
-  });
-  templateSelect.addEventListener("change", () => applyTemplate(templateSelect.value));
-  entryTemplate.addEventListener("change", () => applyTemplate(entryTemplate.value));
-  themeSelect.addEventListener("change", () => setTheme(themeSelect.value));
-  languageSelect.addEventListener("change", () => setLanguage(languageSelect.value));
-  matchBtn.addEventListener("click", analyzeMatch);
-  optimizeBtn.addEventListener("click", generateAdvice);
-  printBtn.addEventListener("click", () => window.print());
-  startBtn.addEventListener("click", enterWorkspace);
-
-  const params = new URLSearchParams(window.location.search);
-  const initialCase = params.get("case");
-  const initialTemplate = params.get("template");
-  const initialTheme = params.get("theme");
-  const initialLang = params.get("lang");
-
-  if (initialCase && cases[initialCase]) changeCase(initialCase);
-  if (initialTemplate && supportedTemplates.includes(initialTemplate)) applyTemplate(initialTemplate);
-  if (initialTheme && supportedThemes.includes(initialTheme)) setTheme(initialTheme);
-  if (initialLang === "en" || initialLang === "zh") setLanguage(initialLang);
-
-  renderResume();
-  if (window.location.search) {
-    enterWorkspace();
+  function onSectionInput(event) {
+    const target = event.target;
+    if (!target.matches("[data-section][data-id][data-field]")) return;
+    const section = target.dataset.section;
+    const id = target.dataset.id;
+    const field = target.dataset.field;
+    const item = state[section].find((entry) => entry.id === id);
+    if (!item) return;
+    item[field] = target.value;
+    const titleNode = target.closest(".entry-item")?.querySelector(".entry-item-head strong");
+    if (titleNode) {
+      titleNode.textContent = sectionConfig[section].title(item);
+    }
+    renderPreview();
   }
+
+  function onRemoveEntry(event) {
+    const button = event.target.closest(".entry-item-remove");
+    if (!button) return;
+    const section = button.dataset.section;
+    const id = button.dataset.id;
+    if (!state[section]) return;
+    state[section] = state[section].filter((item) => item.id !== id);
+    renderEditor();
+    renderPreview();
+  }
+
+  function onAvatarChange(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) {
+      state.avatarUrl = "";
+      renderPreview();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.avatarUrl = reader.result;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function syncInputsFromState() {
+    personalInputs.name.value = state.personal.name;
+    personalInputs.title.value = state.personal.title;
+    personalInputs.email.value = state.personal.email;
+    personalInputs.phone.value = state.personal.phone;
+    personalInputs.location.value = state.personal.location;
+    personalInputs.summary.value = state.personal.summary;
+  }
+
+  function init() {
+    bindEvents();
+    syncInputsFromState();
+
+    const params = new URLSearchParams(window.location.search);
+    const initialCase = params.get("case");
+    const initialTemplate = params.get("template");
+    const initialTheme = params.get("theme");
+    const initialLang = params.get("lang");
+
+    if (initialCase && cases[initialCase]) state.activeCase = initialCase;
+    if (initialTemplate) state.activeTemplate = initialTemplate;
+    if (initialTheme) state.activeTheme = initialTheme;
+    if (initialLang === "en" || initialLang === "zh") state.activeLang = initialLang;
+
+    applyUiLanguage();
+    renderEditor();
+    renderPreview();
+
+    if (window.location.search) {
+      enterWorkspace();
+    }
+  }
+
+  init();
 })();
